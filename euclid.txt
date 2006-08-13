@@ -5,14 +5,29 @@
 :revision: 0.01
 :date: 13 August 2006
 
-:copyright: Copyright (c) 2006 Alex Holkner.
+:copyright: Copyright (c) 2006 Alex Holkner
+    Alex.Holkner@mail.google.com
+    .
+    This library is free software; you can redistribute it and/or modify it
+    under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation; either version 2.1 of the License, or (at
+    your option) any later version.
+    .
+    This library is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+    or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
+    License for more details.
+    .
+    You should have received a copy of the GNU Lesser General Public License
+    along with this library; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 :abstract: A module providing vector, matrix and quaternion operations
     for use in 2D and 3D graphics applications.
 
-====================
-Graphics math module
-====================
+======
+euclid
+======
 
 ------------
 Introduction
@@ -575,3 +590,117 @@ The following methods do not alter the quaternion:
                      0.00     0.00    -1.00     0.00
                      0.00     1.00     0.00     0.00
                      0.00     0.00     0.00     1.00])
+
+-----------
+2D Geometry
+-----------
+
+The following classes are available for dealing with simple 2D geometry:
+
+Point2
+------
+
+A point on a 2D plane.  Construct in the obvious way::
+
+    >>> p = Point2(1.0, 2.0)
+    >>> p
+    Point2(1.00, 2.00)
+
+**Point2** subclasses **Vector2**, so all of **Vector2** operators and
+methods apply.  In particular, subtracting two points gives a vector::
+
+    >>> Point2(2.0, 3.0) - Point2(1.0, 0.0)
+    Vector2(1.00, 3.00)
+
+The following methods are also defined:
+
+``closest(other)``
+    *other* can be a **Line2**, **Ray2** or **LineSegment2**.  A point
+    lying on *other* closest to this point will be returned.
+
+``distance(other)``
+    *other* can be a **Line2**, **Ray2** or **LineSegment2**.  The distance
+    from the point to *other* is returned as a float.
+
+Line2, Ray2, LineSegment2
+-------------------------
+
+A **Line2** is a line on a 2D plane extending to infinity in both directions;
+a **Ray2** has a finite end-point and extends to infinity in a single
+direction; a **LineSegment2** joins two points.  
+
+All three classes support the same constructors, operators and methods,
+but may behave differently when calculating intersections etc.
+
+You may construct a line, ray or line segment using any of:
+
+* another line, ray or line segment
+* two points
+* a point and a vector
+* a point, a vector and a length
+
+For example::
+
+    >>> Line2(Point2(1.0, 1.0), Point2(2.0, 3.0))
+    Line2(<1.00, 1.00> + u<1.00, 2.00>)
+    >>> Line2(Point2(1.0, 1.0), Vector2(1.0, 2.0))
+    Line2(<1.00, 1.00> + u<1.00, 2.00>)
+    >>> Ray2(Point2(1.0, 1.0), Vector2(1.0, 2.0), 1.0)
+    Ray2(<1.00, 1.00> + u<0.45, 0.89>)
+
+Internally, lines, rays and line segments store a Point2 *p* and a
+Vector2 *v*.  You can also access (but not set) the two endpoints
+*p1* and *p2*.  These may or may not be meaningful for all types of lines.
+
+The following methods are supported by all three classes:
+
+``intersect(other)``
+    If *other* is a **Line2**, **Ray2** or **LineSegment2**, returns
+    a **Point2** of intersection, or None if the lines are parallel.
+
+    If *other* is a **Circle**, returns a **LineSegment2** giving
+    the part of the line that intersects the circle, or None if there
+    is no intersection.  Note that a line segment is returned even
+    if the intersection is tangential (i.e., only at one point); the
+    two endpoints will be identical in this case.
+
+``closest(other)``
+    If *other* is a **Point2**, returns the closest point on this
+    line to the given point.
+
+    If *other* is a **Circle**, returns the closest point on the circle
+    to this line.
+
+``distance(other)``
+    If *other* is a **Point2**, returns the minimal distance from the
+    point to the line, as a float.
+
+**LineSegment2** also has a *length* property which is read-only.
+
+Circle
+------
+
+Circles are constructed with a center **Point2** and a radius::
+
+    >>> c = Circle(Point2(1.0, 1.0), 0.5)
+    >>> c
+    Circle(<1.00, 1.00>, radius=0.50)
+
+Internally there are two attributes: *c*, giving the center point and
+*r*, giving the radius.
+
+The following methods are supported:
+
+``intersect(other)``
+    If *other* is a **Line2**, **Ray2** or **LineSegment2**, returns
+    a **LineSegment2** giving the part of the line that intersects the
+    circle, or None if there is no intersection.
+
+``closest(other)``
+    If *other* is a **Line2**, **Ray2** or **LineSegment2**, returns
+    the point on that line closest to the circle.
+
+``distance(other)``
+    If *other* is a **Line2**, **Ray2** or **LineSegment2**, returns
+    the minimal distance to the line as a float.
+    

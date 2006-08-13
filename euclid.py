@@ -1,6 +1,28 @@
 #!/usr/bin/env python
+#
+# euclid graphics maths module
+#
+# Copyright (c) 2006 Alex Holkner
+# Alex.Holkner@mail.google.com
+#
+# This library is free software; you can redistribute it and/or modify it
+# under the terms of the GNU Lesser General Public License as published by the
+# Free Software Foundation; either version 2.1 of the License, or (at your
+# option) any later version.
+# 
+# This library is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License
+# for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public License
+# along with this library; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
-'''
+'''euclid graphics maths module
+
+Documentation and tests are included in the file "euclid.txt", or online
+at http://code.google.com/p/pyeuclid
 '''
 
 __docformat__ = 'restructuredtext'
@@ -48,14 +70,12 @@ class Vector2:
         self.y = y
 
     def __copy__(self):
-        return Vector2(self.x, 
-                       self.y)
+        return self.__class__(self.x, self.y)
 
     copy = __copy__
 
     def __repr__(self):
-        return 'Vector2(%.2f, %.2f)' % (self.x,
-                                        self.y)
+        return 'Vector2(%.2f, %.2f)' % (self.x, self.y)
 
     def __eq__(self, other):
         if isinstance(other, Vector2):
@@ -70,8 +90,7 @@ class Vector2:
         return not self.__eq__(other)
 
     def __nonzero__(self):
-        return self.x or \
-               self.y
+        return self.x != 0 or self.y != 0
 
     def __len__(self):
         return 2
@@ -88,8 +107,11 @@ class Vector2:
         return iter((self.x, self.y))
 
     def __getattr__(self, name):
-        assert len(name.replace('x', '').replace('y', '')) == 0
-        return tuple([(self.x, self.y)['xy'.find(c)] for c in name])
+        try:
+            return tuple([(self.x, self.y)['xy'.index(c)] \
+                          for c in name])
+        except ValueError:
+            raise AttributeError, name
 
     if _enable_swizzle_set:
         # This has detrimental performance on ordinary setattr as well
@@ -98,13 +120,13 @@ class Vector2:
             if len(name) == 1:
                 object.__setattr__(self, name, value)
             else:
-                assert len(name.replace('x', '')\
-                               .replace('y', '')) == 0
-                l = [self.x, self.y]
-                for c, v in map(None, name, value):
-                    l['xy'.find(c)] = v
-                self.x, self.y = l
-
+                try:
+                    l = [self.x, self.y]
+                    for c, v in map(None, name, value):
+                        l['xy'.index(c)] = v
+                    self.x, self.y = l
+                except ValueError:
+                    raise AttributeError, name
 
     def __add__(self, other):
         if isinstance(other, Vector2):
@@ -244,9 +266,7 @@ class Vector3:
         self.z = z
 
     def __copy__(self):
-        return Vector3(self.x, 
-                       self.y, 
-                       self.z)
+        return self.__class__(self.x, self.y, self.z)
 
     copy = __copy__
 
@@ -289,8 +309,11 @@ class Vector3:
         return iter((self.x, self.y, self.z))
 
     def __getattr__(self, name):
-        assert len(name.replace('x', '').replace('y', '').replace('z', '')) == 0
-        return tuple([(self.x, self.y, self.z)['xyz'.find(c)] for c in name])
+        try:
+            return tuple([(self.x, self.y, self.z)['xyz'.index(c)] \
+                          for c in name])
+        except ValueError:
+            raise AttributeError, name
 
     if _enable_swizzle_set:
         # This has detrimental performance on ordinary setattr as well
@@ -299,13 +322,13 @@ class Vector3:
             if len(name) == 1:
                 object.__setattr__(self, name, value)
             else:
-                assert len(name.replace('x', '')\
-                               .replace('y', '')\
-                               .replace('z', '')) == 0
-                l = [self.x, self.y, self.z]
-                for c, v in map(None, name, value):
-                    l['xyz'.find(c)] = v
-                self.x, self.y, self.z = l
+                try:
+                    l = [self.x, self.y, self.z]
+                    for c, v in map(None, name, value):
+                        l['xyz'.index(c)] = v
+                    self.x, self.y, self.z = l
+                except ValueError:
+                    raise AttributeError, name
 
 
     def __add__(self, other):
@@ -1106,3 +1129,198 @@ class Quaternion:
         Q.z = q1.z * ratio1 + q2.z * ratio2
         return Q
     new_interpolate = classmethod(new_interpolate)
+
+# Geometry
+# Much maths thanks to Paul Bourke, http://astronomy.swin.edu.au/~pbourke
+# ---------------------------------------------------------------------------
+
+def _closest_point2_line2(point, line):
+    d = line.v.magnitude_squared()
+    assert d != 0
+    u = ((point.x - line.p.x) * line.v.x + \
+         (point.y - line.p.y) * line.v.y) / d
+    if not line._u_in(u):
+        u = max(min(u, 1.0), 0.0)
+    return Point2(self.p.x + u * self.v.x,
+                  self.p.y + u * self.v.y)
+
+class Point2(Vector2):
+    def __repr__(self):
+        return 'Point2(%.2f, %.2f)' % (self.x, self.y)
+
+    def closest(self, other):
+        if isinstance(other, Line2):
+            return _closest_point2_line2(self, other)
+        raise AttributeError, other
+
+    def distance(self, other):
+        if isinstance(other, Line2):
+            return abs(_closest_point2_line2(self, other) - other)
+        raise AttributeError, other
+
+class Line2:
+    __slots__ = ['p', 'v']
+
+    def __init__(self, *args):
+        if len(args) == 3:
+            assert isinstance(args[0], Point2) and \
+                   isinstance(args[1], Vector2) and \
+                   type(args[2]) == float
+            self.p = args[0].copy()
+            self.v = args[1] * args[2] / abs(args[1])
+        elif len(args) == 2:
+            if isinstance(args[0], Point2) and isinstance(args[1], Point2):
+                self.p = args[0].copy()
+                self.v = args[1] - args[0]
+            elif isinstance(args[0], Point2) and isinstance(args[1], Vector2):
+                self.p = args[0].copy()
+                self.v = args[1].copy()
+            else:
+                raise AttributeError, '%r' % (args,)
+        elif len(args) == 1:
+            if isinstance(args[0], Line2):
+                self.p = args[0].p.copy()
+                self.v = args[0].v.copy()
+            else:
+                raise AttributeError, '%r' % (args,)
+        else:
+            raise AttributeError, '%r' % (args,)
+        
+        if not self.v:
+            raise AttributeError, 'Line has zero-length vector'
+
+    def __copy__(self):
+        return self.__class__(self.p, self.v)
+
+    copy = __copy__
+
+    def __repr__(self):
+        return 'Line2(<%.2f, %.2f> + u<%.2f, %.2f>)' % \
+            (self.p.x, self.p.y, self.v.x, self.v.y)
+
+    p1 = property(lambda self: self.p)
+    p2 = property(lambda self: Point2(self.p.x + self.v.x, self.p.y + self.v.y))
+
+    def _u_in(self, u):
+        return True
+
+    def intersect(self, other):
+        if isinstance(other, Line2):
+            d = other.v.y * self.v.x - other.v.x * self.v.y
+            if d == 0:
+                return None
+
+            dy = self.p.y - other.p.y
+            dx = self.p.x - other.p.x
+            ua = (other.v.x * dy - other.v.y * dx) / d
+            if not self._u_in(ua):
+                return None
+            ub = (self.v.x * dy - self.v.y * dx) / d
+            if not other._u_in(ub):
+                return None
+
+            return Point2(self.p.x + ua * self.v.x,
+                          self.p.y + ua * self.v.y)
+        elif isinstance(other, Circle):
+            return other.intersect(self)
+        raise AttributeError, other
+
+    def closest(self, other):
+        if isinstance(other, Point2):
+            return _closest_point2_line2(other, self)
+        elif isinstance(other, Circle):
+            p = other.closest(self)
+            return LineSegment2(other.c, p - other.c, other.r).p2
+        raise AttributeError, other
+
+    def distance(self, other):
+        if isinstance(other, Point2):
+            return abs(_closest_point2_line2(other, self) - other)
+        raise AttributeError, other
+
+class Ray2(Line2):
+    def __repr__(self):
+        return 'Ray2(<%.2f, %.2f> + u<%.2f, %.2f>)' % \
+            (self.p.x, self.p.y, self.v.x, self.v.y)
+
+    def _u_in(self, u):
+        return u >= 0.0
+
+class LineSegment2(Line2):
+    def __repr__(self):
+        return 'LineSegment2(<%.2f, %.2f> to <%.2f, %.2f>)' % \
+            (self.p.x, self.p.y, self.p.x + self.v.x, self.p.y + self.v.y)
+
+    def _u_in(self, u):
+        return u >= 0.0 and u <= 1.0
+
+    def __abs__(self):
+        return abs(self.v)
+
+    length = property(lambda self: abs(self.v))
+
+class Circle:
+    __slots__ = ['c', 'r']
+
+    def __init__(self, center, radius):
+        assert isinstance(center, Vector2) and type(radius) == float
+        self.c = center.copy()
+        self.r = radius
+
+    def __copy__(self):
+        return self.__class__(self.c, self.r)
+
+    copy = __copy__
+
+    def __repr__(self):
+        return 'Circle(<%.2f, %.2f>, radius=%.2f)' % \
+            (self.c.x, self.c.y, self.r)
+
+    def intersect(self, other):
+        if isinstance(other, Line2):
+            a = other.v.magnitude_squared()
+            b = 2 * (other.v.x * (other.p.x - self.c.x) + \
+                     other.v.y * (other.p.y - self.c.y))
+            c = self.c.x ** 2 + self.c.y ** 2 + \
+                other.p.magnitude_squared() - \
+                2 * (self.c.x * other.p.x + self.c.y * other.p.y) - \
+                self.r ** 2
+            det = b ** 2 - 4 * a * c
+            if det < 0:
+                return None
+            sq = math.sqrt(det)
+            u1 = (-b + sq) / (2 * a)
+            u2 = (-b - sq) / (2 * a)
+            if not other._u_in(u1):
+                u1 = max(min(u1, 1.0), 0.0)
+            if not other._u_in(u2):
+                u2 = max(min(u2, 1.0), 0.0)
+            return LineSegment2(Point2(other.p.x + u1 * other.v.x,
+                                       other.p.y + u1 * other.v.y),
+                                Point2(other.p.x + u2 * other.v.x,
+                                       other.p.y + u2 * other.v.y))
+        raise AttributeError, other
+
+    def closest(self, other):
+        if isinstance(other, Line2): 
+            # XXX: endpoint(s) may be closer than nearest colinear point; not
+            #      checked for.
+            d = other.v.magnitude_squared()
+            assert d != 0
+            u = ((self.c.x - other.p.x) * other.v.x + \
+                 (self.c.y - other.p.y) * other.v.y) / d
+            if not other._u_in(u):
+                u = max(min(u, 1.0), 0.0)
+            p = Point2(other.p.x + u * other.v.x,
+                       other.p.y + u * other.v.y)
+            return p
+        raise AttributeError, other  
+
+    def distance(self, other):
+        if isinstance(other, Line2):
+            p = self.closest(other)
+            return abs(p - self.c) - self.r
+
+class Point3(Vector3):
+    def __repr__(self):
+        return 'Point3(%.2f, %.2f, %.2f)' % (self.x, self.y, self.z)
