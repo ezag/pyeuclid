@@ -543,12 +543,20 @@ class Matrix3:
             C.j = A.i * B.b + A.j * B.f + A.k * B.j
             C.k = A.i * B.c + A.j * B.g + A.k * B.k
             return C
-        else:
-            assert isinstance(other, Vector2)
+        elif isinstance(other, Point2):
+            P = Point2(0, 0)
+            P.x = A.a * B.x + A.b * B.y + A.c
+            P.y = A.e * B.x + A.f * B.y + A.g
+            return P
+        elif isinstance(other, Vector2):
             V = Vector2(0, 0)
-            V.x = A.a * B.x + A.b * B.y + A.c
-            V.y = A.e * B.x + A.f * B.y + A.g
+            V.x = A.a * B.x + A.b * B.y 
+            V.y = A.e * B.x + A.f * B.y 
             return V
+        else:
+            other = other.copy()
+            other._apply_transform(self)
+            return other
 
     def __imul__(self, other):
         assert isinstance(other, Matrix3)
@@ -700,13 +708,22 @@ class Matrix4:
             C.o = A.m * B.c + A.n * B.g + A.o * B.k + A.p * B.o
             C.p = A.m * B.d + A.n * B.h + A.o * B.l + A.p * B.p
             return C
-        else:
-            assert isinstance(other, Vector3)
+        elif isinstance(other, Point3):
+            P = Point3(0, 0, 0)
+            P.x = A.a * B.x + A.b * B.y + A.c * B.z + A.d
+            P.y = A.e * B.x + A.f * B.y + A.g * B.z + A.h
+            P.z = A.i * B.x + A.j * B.y + A.k * B.z + A.l
+            return P
+        elif isinstance(other, Vector3):
             V = Vector3(0, 0, 0)
-            V.x = A.a * B.x + A.b * B.y + A.c * B.z + A.d
-            V.y = A.e * B.x + A.f * B.y + A.g * B.z + A.h
-            V.z = A.i * B.x + A.j * B.y + A.k * B.z + A.l
+            V.x = A.a * B.x + A.b * B.y + A.c * B.z
+            V.y = A.e * B.x + A.f * B.y + A.g * B.z
+            V.z = A.i * B.x + A.j * B.y + A.k * B.z
             return V
+        else:
+            other = other.copy()
+            other._apply_transform(self)
+            return other
 
     def __imul__(self, other):
         assert isinstance(other, Matrix4)
@@ -924,8 +941,7 @@ class Quaternion:
             Q.z =  A.x * B.y - A.y * B.x + A.z * B.w + A.w * B.z
             Q.w = -A.x * B.x - A.y * B.y - A.z * B.z + A.w * B.w
             return Q
-        else:
-            assert isinstance(other, Vector3)
+        elif isinstance(other, Vector3):
             V = other
             w = self.w
             x = self.x
@@ -940,6 +956,10 @@ class Quaternion:
                            2 * x * z * V.x + 2 * y * z * V.y + \
                            z * z * V.z - 2 * w * y * V.x - y * y * V.z + \
                            2 * w * x * V.y - x * x * V.z + w * w * V.z)
+        else:
+            other = other.copy()
+            other._apply_transform(self)
+            return other
 
     def __imul__(self, other):
         assert isinstance(other, Quaternion)
@@ -1240,7 +1260,12 @@ class Line2:
             (self.p.x, self.p.y, self.v.x, self.v.y)
 
     p1 = property(lambda self: self.p)
-    p2 = property(lambda self: Point2(self.p.x + self.v.x, self.p.y + self.v.y))
+    p2 = property(lambda self: Point2(self.p.x + self.v.x, 
+                                      self.p.y + self.v.y))
+
+    def _apply_transform(self, t):
+        self.p = t * self.p
+        self.v = t * self.v
 
     def _u_in(self, u):
         return True
@@ -1317,6 +1342,9 @@ class Circle:
     def __repr__(self):
         return 'Circle(<%.2f, %.2f>, radius=%.2f)' % \
             (self.c.x, self.c.y, self.r)
+
+    def _apply_transform(self, t):
+        self.c = t * self.c
 
     def intersect(self, other):
         if isinstance(other, Line2):
@@ -1487,6 +1515,10 @@ class Line3:
                                       self.p.y + self.v.y,
                                       self.p.z + self.v.z))
 
+    def _apply_transform(self, t):
+        self.p = t * self.p
+        self.v = t * self.v
+
     def _u_in(self, u):
         return True
 
@@ -1542,6 +1574,9 @@ class Sphere:
     def __repr__(self):
         return 'Sphere(<%.2f, %.2f, %.2f>, radius=%.2f)' % \
             (self.c.x, self.c.y, self.c.z, self.r)
+
+    def _apply_transform(self, t):
+        self.c = t * self.c
 
     def connect(self, other):
         if isinstance(other, Point3):

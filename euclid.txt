@@ -2,8 +2,8 @@
 :author: Alex Holkner
 :address: alex@partiallydisassembled.net
 
-:revision: 0.01
-:date: 13 August 2006
+:revision: 0.01 (in development)
+:date: 14 August 2006
 
 :copyright: Copyright (c) 2006 Alex Holkner
     Alex.Holkner@gmail.com
@@ -407,14 +407,26 @@ In-place multiplication is also permitted (and optimised)::
                  0.00     0.00     1.00])
 
 Multiplying a matrix by a vector returns a vector, and is used to
-transform a vector (or point)::
+transform a vector::
+
+    >>> m1 = Matrix3.new_rotate(math.pi / 2)
+    >>> m1 * Vector2(1.0, 1.0)
+    Vector2(-1.00, 1.00)
+
+Note that translations have no effect on vectors.  They do affect
+points, however::
 
     >>> m1 = Matrix3.new_translate(5.0, 6.0)
     >>> m1 * Vector2(1.0, 2.0)
-    Vector2(6.00, 8.00)
+    Vector2(1.00, 2.00)
+    >>> m1 * Point2(1.0, 2.0)
+    Point2(6.00, 8.00)
 
-A **Matrix3** can be multiplied with a **Vector2**, and a **Matrix4** can be
-multiplied with a **Vector3**.
+A **Matrix3** can be multiplied with a **Vector2** or any of the 2D geometry
+objects (**Point2**, **Line2**, **Circle**, etc).  
+
+A **Matrix4** can be multiplied with a **Vector3** or any of the 3D geometry
+objects (**Point3**, **Line3**, **Sphere**, etc).
 
 For convenience, each of the matrix constructors are also available as
 in-place operators.  For example, instead of writing::
@@ -539,6 +551,12 @@ appropriately::
     >>> q = Quaternion.new_rotate_axis(math.pi / 2, Vector3(0, 1, 0))
     >>> q * Vector3(1.0, 0, 0)
     Vector3(0.00, 0.00, -1.00)
+
+Similarly, any 3D object can be multiplied (e.g., **Point3**, **Line3**,
+**Sphere**, etc)::
+
+    >>> q * Ray3(Point3(1., 1., 1.), Vector3(1., 1., 1.))
+    Ray3(<1.00, 1.00, -1.00> + u<1.00, 1.00, -1.00>)
 
 As with the matrix classes, the constructors are also available as in-place
 operators.  These are named ``identity``, ``rotate_euler`` and
