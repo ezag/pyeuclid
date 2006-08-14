@@ -290,9 +290,7 @@ class Vector3:
         return not self.__eq__(other)
 
     def __nonzero__(self):
-        return self.x or \
-               self.y or \
-               self.z
+        return self.x != 0 or self.y != 0 or self.z != 0
 
     def __len__(self):
         return 3
@@ -905,10 +903,10 @@ class Quaternion:
 
     def __copy__(self):
         Q = Quaternion()
-        Q.w = w
-        Q.x = x
-        Q.y = y
-        Q.z = z
+        Q.w = self.w
+        Q.x = self.x
+        Q.y = self.y
+        Q.z = self.z
 
     copy = __copy__
 
@@ -1141,8 +1139,8 @@ def _connect_point2_line2(P, L):
          (P.y - L.p.y) * L.v.y) / d
     if not L._u_in(u):
         u = max(min(u, 1.0), 0.0)
-    return P, Point2(self.p.x + u * self.v.x,
-                     self.p.y + u * self.v.y)
+    return P, Point2(L.p.x + u * L.v.x,
+                     L.p.y + u * L.v.y)
 
 def _connect_point2_circle(P, C):
     v = P - C.c
@@ -1193,10 +1191,9 @@ class Point2(Vector2):
         if isinstance(other, Point2):
             return LineSegment2(self, other)
         elif isinstance(other, Line2):
-            p1, p2 = _connect_point2_line2
-            return LineSegment2(p1, p2)
+            return LineSegment2(*_connect_point2_line2(self, other))
         elif isinstance(other, Circle):
-            return LineSegment2(_connect_point2_circle(self, other))
+            return LineSegment2(*_connect_point2_circle(self, other))
         raise AttributeError, other
 
     def distance(self, other):
@@ -1364,6 +1361,206 @@ class Circle:
     def distance(self, other):
         return self.connect(other).length
 
+# 3D Geometry
+# -------------------------------------------------------------------------
+
+def _connect_point3_line3(P, L):
+    d = L.v.magnitude_squared()
+    assert d != 0
+    u = ((P.x - L.p.x) * L.v.x + \
+         (P.y - L.p.y) * L.v.y + \
+         (P.z - L.p.z) * L.v.z) / d
+    if not L._u_in(u):
+        u = max(min(u, 1.0), 0.0)
+    return P, Point3(L.p.x + u * L.v.x,
+                     L.p.y + u * L.v.y,
+                     L.p.z + u * L.v.z)
+
+def _connect_point3_sphere(P, S):
+    v = P - S.c
+    v.normalize()
+    v *= S.r
+    return P, Point3(S.c.x + v.x, S.c.y + v.y, S.c.z + v.z)
+
+def _connect_line3_line3(A, B):
+    assert A.v and B.v
+    p13 = A.p - B.p
+    d1343 = p13.dot(B.v)
+    d4321 = B.v.dot(A.v)
+    d1321 = p13.dot(A.v)
+    d4343 = B.v.magnitude_squared()
+    denom = A.v.magnitude_squared() * d4343 - d4321 ** 2
+    if denom == 0:
+        # Parallel, connect an endpoint with a line
+        if isinstance(B, Ray3) or isinstance(B, LineSegment3):
+            p1, p2 = _connect_point3_line3(B.p, A)
+            return p2, p1
+        # No endpoint (or endpoint is on A), possibly choose arbitrary
+        # point on line.
+        return _connect_point3_line3(A.p, B)
+
+    ua = (d1343 * d4321 - d1321 * d4343) / denom
+    if not A._u_in(ua):
+        ua = max(min(ua, 1.0), 0.0)
+    ub = (d1343 + d4321 * ua) / d4343
+    if not B._u_in(ub):
+        ub = max(min(ub, 1.0), 0.0)
+    return (Point3(A.p.x + ua * A.v.x,
+                   A.p.y + ua * A.v.y,
+                   A.p.z + ua * A.v.z),
+            Point3(B.p.x + ub * B.v.x,
+                   B.p.y + ub * B.v.y,
+                   B.p.z + ub * B.v.z))
+
+def _connect_sphere_line3(S, L):
+    d = L.v.magnitude_squared()
+    assert d != 0
+    u = ((S.c.x - L.p.x) * L.v.x + \
+         (S.c.y - L.p.y) * L.v.y + \
+         (S.c.z - L.p.z) * L.v.z) / d
+    if not L._u_in(u):
+        u = max(min(u, 1.0), 0.0)
+    point = Point3(L.p.x + u * L.v.x, L.p.y + u * L.v.y, L.p.z + u * L.v.z)
+    v = (point - S.c)
+    v.normalize()
+    v *= S.r
+    return Point3(S.c.x + v.x, S.c.y + v.y, S.c.z + v.z), point
+
 class Point3(Vector3):
     def __repr__(self):
         return 'Point3(%.2f, %.2f, %.2f)' % (self.x, self.y, self.z)
+
+    def connect(self, other):
+        if isinstance(other, Point3):
+            return LineSegment3(self, other)
+        elif isinstance(other, Line3):
+            return LineSegment3(*_connect_point3_line3(self, other))
+        elif isinstance(other, Sphere):
+            return LineSegment3(*_connect_point3_sphere(self, other))
+        raise AttributeError, other
+
+    def distance(self, other):
+        return self.connect(other).length
+
+class Line3:
+    __slots__ = ['p', 'v']
+
+    def __init__(self, *args):
+        if len(args) == 3:
+            assert isinstance(args[0], Point3) and \
+                   isinstance(args[1], Vector3) and \
+                   type(args[2]) == float
+            self.p = args[0].copy()
+            self.v = args[1] * args[2] / abs(args[1])
+        elif len(args) == 2:
+            if isinstance(args[0], Point3) and isinstance(args[1], Point3):
+                self.p = args[0].copy()
+                self.v = args[1] - args[0]
+            elif isinstance(args[0], Point3) and isinstance(args[1], Vector3):
+                self.p = args[0].copy()
+                self.v = args[1].copy()
+            else:
+                raise AttributeError, '%r' % (args,)
+        elif len(args) == 1:
+            if isinstance(args[0], Line3):
+                self.p = args[0].p.copy()
+                self.v = args[0].v.copy()
+            else:
+                raise AttributeError, '%r' % (args,)
+        else:
+            raise AttributeError, '%r' % (args,)
+        
+        if not self.v:
+            raise AttributeError, 'Line has zero-length vector'
+
+    def __copy__(self):
+        return self.__class__(self.p, self.v)
+
+    copy = __copy__
+
+    def __repr__(self):
+        return 'Line3(<%.2f, %.2f, %.2f> + u<%.2f, %.2f, %.2f>)' % \
+            (self.p.x, self.p.y, self.p.z, self.v.x, self.v.y, self.v.z)
+
+    p1 = property(lambda self: self.p)
+    p2 = property(lambda self: Point3(self.p.x + self.v.x, 
+                                      self.p.y + self.v.y,
+                                      self.p.z + self.v.z))
+
+    def _u_in(self, u):
+        return True
+
+    def connect(self, other):
+        if isinstance(other, Point3):
+            p, l = _connect_point3_line3(other, self)
+            return LineSegment3(l, p)
+        elif isinstance(other, Line3):
+            return LineSegment3(*_connect_line3_line3(self, other))
+        elif isinstance(other, Sphere):
+            p, l = _connect_sphere_line3(other, self)
+            return LineSegment3(l, p)
+        raise AttributeError, other
+
+    def distance(self, other):
+        return self.connect(other).length
+
+class Ray3(Line3):
+    def __repr__(self):
+        return 'Ray3(<%.2f, %.2f, %.2f> + u<%.2f, %.2f, %.2f>)' % \
+            (self.p.x, self.p.y, self.p.z, self.v.x, self.v.y, self.v.z)
+
+    def _u_in(self, u):
+        return u >= 0.0
+
+class LineSegment3(Line3):
+    def __repr__(self):
+        return 'LineSegment3(<%.2f, %.2f, %.2f> to <%.2f, %.2f, %.2f>)' % \
+            (self.p.x, self.p.y, self.p.z,
+             self.p.x + self.v.x, self.p.y + self.v.y, self.p.z + self.v.z)
+
+    def _u_in(self, u):
+        return u >= 0.0 and u <= 1.0
+
+    def __abs__(self):
+        return abs(self.v)
+
+    length = property(lambda self: abs(self.v))
+
+class Sphere:
+    __slots__ = ['c', 'r']
+
+    def __init__(self, center, radius):
+        assert isinstance(center, Vector3) and type(radius) == float
+        self.c = center.copy()
+        self.r = radius
+
+    def __copy__(self):
+        return self.__class__(self.c, self.r)
+
+    copy = __copy__
+
+    def __repr__(self):
+        return 'Sphere(<%.2f, %.2f, %.2f>, radius=%.2f)' % \
+            (self.c.x, self.c.y, self.c.z, self.r)
+
+    def connect(self, other):
+        if isinstance(other, Point3):
+            p, s = _connect_point3_sphere(other, self)
+            return LineSegment3(s, p)
+        elif isinstance(other, Line3):
+            return LineSegment3(*_connect_sphere_line3(self, other))
+        elif isinstance(other, Sphere):
+            A = self
+            B = other
+            v = B.c - A.c
+            v.normalize()
+            return (Point3(A.c.x + v.x * A.r,
+                           A.c.y + v.y * A.r,
+                           A.c.x + v.z * A.r),
+                    Point3(B.c.x + v.x * B.r,
+                           B.c.y + v.y * B.r,
+                           B.c.x + v.z * B.r))
+        raise AttributeError, other
+
+    def distance(self, other):
+        return self.connect(other).length

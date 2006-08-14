@@ -610,7 +610,6 @@ For example, to find the closest point on a line to a circle::
     >>> line.connect(circ).p1
     Point2(0.50, -0.50)
 
-
 To find the corresponding closest point on the circle to the line::
 
     >>> line.connect(circ).p2
@@ -724,3 +723,118 @@ The following methods are supported:
 ``distance(other)``
     Returns the absolute minimum distance to *other*.  Internally this
     simply returns the length of the result of ``connect``. 
+
+-----------
+3D Geometry
+-----------
+
+The following classes are available for dealing with simple 3D geometry.
+The interfaces are very similar to the 2D classes (but note that you
+cannot mix and match 2D and 3D operations).
+
+For example, to find the closest point on a line to a sphere::
+
+    >>> sphere = Sphere(Point3(1., 2., 3.,), 2.)
+    >>> line = Line3(Point3(0., 0., 0.), Point3(-1., -1., 0.))
+    >>> line.connect(sphere).p1
+    Point3(1.50, 1.50, 0.00)
+
+To find the corresponding closest point on the sphere to the line::
+
+    >>> line.connect(sphere).p2
+    Point3(1.32, 1.68, 1.05)
+
+XXX I have not checked if these are correct.
+
+Point3
+------
+
+A point on a 3D plane.  Construct in the obvious way::
+
+    >>> p = Point3(1.0, 2.0, 3.0)
+    >>> p
+    Point3(1.00, 2.00, 3.00)
+
+**Point3** subclasses **Vector3**, so all of **Vector3** operators and
+methods apply.  In particular, subtracting two points gives a vector::
+
+    >>> Point3(1.0, 2.0, 3.0) - Point3(1.0, 0.0, -2.0)
+    Vector3(0.00, 2.00, 5.00)
+
+The following methods are also defined:
+
+``connect(other)``
+    Returns a **LineSegment3** which is the minimum length line segment
+    that can connect the two shapes.  *other* may be a **Point3**, **Line3**,
+    **Ray3**, **LineSegment3** or **Sphere**.
+
+``distance(other)``
+    Returns the absolute minimum distance to *other*.  Internally this
+    simply returns the length of the result of ``connect``. 
+
+Line3, Ray3, LineSegment3
+-------------------------
+
+A **Line3** is a line on a 3D plane extending to infinity in both directions;
+a **Ray3** has a finite end-point and extends to infinity in a single
+direction; a **LineSegment3** joins two points.  
+
+All three classes support the same constructors, operators and methods,
+but may behave differently when calculating intersections etc.
+
+You may construct a line, ray or line segment using any of:
+
+* another line, ray or line segment
+* two points
+* a point and a vector
+* a point, a vector and a length
+
+For example::
+
+    >>> Line3(Point3(1.0, 1.0, 1.0), Point3(1.0, 2.0, 3.0))
+    Line3(<1.00, 1.00, 1.00> + u<0.00, 1.00, 2.00>)
+    >>> Line3(Point3(0.0, 1.0, 1.0), Vector3(1.0, 1.0, 2.0))
+    Line3(<0.00, 1.00, 1.00> + u<1.00, 1.00, 2.00>)
+    >>> Ray3(Point3(1.0, 1.0, 1.0), Vector3(1.0, 1.0, 2.0), 1.0)
+    Ray3(<1.00, 1.00, 1.00> + u<0.41, 0.41, 0.82>)
+
+Internally, lines, rays and line segments store a Point3 *p* and a
+Vector3 *v*.  You can also access (but not set) the two endpoints
+*p1* and *p2*.  These may or may not be meaningful for all types of lines.
+
+The following methods are supported by all three classes:
+
+``connect(other)``
+    Returns a **LineSegment3** which is the minimum length line segment
+    that can connect the two shapes.  For two parallel lines, this
+    line segment may be in an arbitrary position.  *other* may be
+    a **Point3**, **Line3**, **Ray3**, **LineSegment3** or **Sphere**.
+
+``distance(other)``
+    Returns the absolute minimum distance to *other*.  Internally this
+    simply returns the length of the result of ``connect``.
+
+**LineSegment3** also has a *length* property which is read-only.
+
+Sphere
+------
+
+Spheres are constructed with a center **Point3** and a radius::
+
+    >>> s = Sphere(Point3(1.0, 1.0, 1.0), 0.5)
+    >>> s
+    Sphere(<1.00, 1.00, 1.00>, radius=0.50)
+
+Internally there are two attributes: *c*, giving the center point and
+*r*, giving the radius.
+
+The following methods are supported:
+
+``connect(other)``
+    Returns a **LineSegment3** which is the minimum length line segment
+    that can connect the two shapes. *other* may be a **Point3**, **Line3**,
+    **Ray3**, **LineSegment3** or **Sphere**.
+
+``distance(other)``
+    Returns the absolute minimum distance to *other*.  Internally this
+    simply returns the length of the result of ``connect``.
