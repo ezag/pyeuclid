@@ -40,7 +40,7 @@ import types
 #                      of Python, "better".
 # _use_slots = False:  Ordinary classes, much faster than slots in current
 #                      versions of Python (2.4 and 2.5).
-_use_slots = False
+_use_slots = True
 
 # If True, allows components of Vector2 and Vector3 to be set via swizzling;
 # e.g.  v.xyz = (1, 2, 3).  This is much, much slower than the more verbose
@@ -56,10 +56,10 @@ if _enable_swizzle_set:
 class _EuclidMetaclass(type):
     def __new__(cls, name, bases, dct):
         if _use_slots:
-            return type.__new__(cls, name, (object,), dct)
+            return type.__new__(cls, name, bases + (object,), dct)
         else:
             del dct['__slots__']
-            return types.ClassType.__new__(types.ClassType, name, (), dct)
+            return types.ClassType.__new__(types.ClassType, name, bases, dct)
 __metaclass__ = _EuclidMetaclass
 
 class Vector2:
