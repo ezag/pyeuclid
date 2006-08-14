@@ -6,7 +6,7 @@
 :date: 13 August 2006
 
 :copyright: Copyright (c) 2006 Alex Holkner
-    Alex.Holkner@mail.google.com
+    Alex.Holkner@gmail.com
     .
     This library is free software; you can redistribute it and/or modify it
     under the terms of the GNU Lesser General Public License as published by
@@ -260,12 +260,16 @@ do so with a slice::
     >>> m = Matrix4()
     >>> m[:]
     [1.0, 0, 0, 0, 0, 1.0, 0, 0, 0, 0, 1.0, 0, 0, 0, 0, 1.0]
-    >>> m[1:4] = (5, 5, 5)
+    >>> m[12:15] = (5, 5, 5)
     >>> m
-    Matrix4([    1.00     5.00     5.00     5.00
-                 0.00     1.00     0.00     0.00
-                 0.00     0.00     1.00     0.00
+    Matrix4([    1.00     0.00     0.00     5.00
+                 0.00     1.00     0.00     5.00
+                 0.00     0.00     1.00     5.00
                  0.00     0.00     0.00     1.00])
+
+Note that slices operate in column-major order, which makes them
+suitable for working directly with OpenGL's ``glLoadMatrix`` and
+``glGetFloatv`` functions.
 
 Class constructors
 ------------------
@@ -595,7 +599,23 @@ The following methods do not alter the quaternion:
 2D Geometry
 -----------
 
-The following classes are available for dealing with simple 2D geometry:
+The following classes are available for dealing with simple 2D geometry.
+The interface to each shape is similar; in particular, the ``connect``
+and ``distance`` methods are defined identically for each.
+
+For example, to find the closest point on a line to a circle::
+
+    >>> circ = Circle(Point2(3., 2.), 2.)
+    >>> line = Line2(Point2(0., 0.), Point2(-1., 1.))
+    >>> line.connect(circ).p1
+    Point2(0.50, -0.50)
+
+
+To find the corresponding closest point on the circle to the line::
+
+    >>> line.connect(circ).p2
+    Point2(1.59, 0.59)
+
 
 Point2
 ------
@@ -614,13 +634,14 @@ methods apply.  In particular, subtracting two points gives a vector::
 
 The following methods are also defined:
 
-``closest(other)``
-    *other* can be a **Line2**, **Ray2** or **LineSegment2**.  A point
-    lying on *other* closest to this point will be returned.
+``connect(other)``
+    Returns a **LineSegment2** which is the minimum length line segment
+    that can connect the two shapes.  *other* may be a **Point2**, **Line2**,
+    **Ray2**, **LineSegment2** or **Circle**.
 
 ``distance(other)``
-    *other* can be a **Line2**, **Ray2** or **LineSegment2**.  The distance
-    from the point to *other* is returned as a float.
+    Returns the absolute minimum distance to *other*.  Internally this
+    simply returns the length of the result of ``connect``. 
 
 Line2, Ray2, LineSegment2
 -------------------------
@@ -664,16 +685,15 @@ The following methods are supported by all three classes:
     if the intersection is tangential (i.e., only at one point); the
     two endpoints will be identical in this case.
 
-``closest(other)``
-    If *other* is a **Point2**, returns the closest point on this
-    line to the given point.
-
-    If *other* is a **Circle**, returns the closest point on the circle
-    to this line.
+``connect(other)``
+    Returns a **LineSegment2** which is the minimum length line segment
+    that can connect the two shapes.  For two parallel lines, this
+    line segment may be in an arbitrary position.  *other* may be
+    a **Point2**, **Line2**, **Ray2**, **LineSegment2** or **Circle**.
 
 ``distance(other)``
-    If *other* is a **Point2**, returns the minimal distance from the
-    point to the line, as a float.
+    Returns the absolute minimum distance to *other*.  Internally this
+    simply returns the length of the result of ``connect``.
 
 **LineSegment2** also has a *length* property which is read-only.
 
@@ -696,11 +716,11 @@ The following methods are supported:
     a **LineSegment2** giving the part of the line that intersects the
     circle, or None if there is no intersection.
 
-``closest(other)``
-    If *other* is a **Line2**, **Ray2** or **LineSegment2**, returns
-    the point on that line closest to the circle.
+``connect(other)``
+    Returns a **LineSegment2** which is the minimum length line segment
+    that can connect the two shapes. *other* may be a **Point2**, **Line2**,
+    **Ray2**, **LineSegment2** or **Circle**.
 
 ``distance(other)``
-    If *other* is a **Line2**, **Ray2** or **LineSegment2**, returns
-    the minimal distance to the line as a float.
-    
+    Returns the absolute minimum distance to *other*.  Internally this
+    simply returns the length of the result of ``connect``. 

@@ -519,16 +519,16 @@ class Matrix3:
                    self.i, self.j, self.k)
 
     def __getitem__(self, key):
-        return [self.a, self.b, self.c,
-                self.e, self.f, self.g,
-                self.i, self.j, self.k][key]
+        return [self.a, self.e, self.i,
+                self.b, self.f, self.j,
+                self.c, self.g, self.k][key]
 
     def __setitem__(self, key, value):
         L = self[:]
         L[key] = value
-        (self.a, self.b, self.c,
-         self.e, self.f, self.g,
-         self.i, self.j, self.k) = L
+        (self.a, self.e, self.i,
+         self.b, self.f, self.j,
+         self.c, self.g, self.k) = L
 
     def __mul__(self, other):
         A = self
@@ -665,20 +665,20 @@ class Matrix4:
                    self.m, self.n, self.o, self.p)
 
     def __getitem__(self, key):
-        return [self.a, self.b, self.c, self.d,
-                self.e, self.f, self.g, self.h,
-                self.i, self.j, self.k, self.l,
-                self.m, self.n, self.o, self.p][key]
+        return [self.a, self.e, self.i, self.m,
+                self.b, self.f, self.j, self.n,
+                self.c, self.g, self.k, self.o,
+                self.d, self.h, self.l, self.p][key]
 
     def __setitem__(self, key, value):
         assert not isinstance(key, slice) or \
                key.stop - key.start == len(value), 'key length != value length'
         L = self[:]
         L[key] = value
-        (self.a, self.b, self.c, self.d,
-         self.e, self.f, self.g, self.h,
-         self.i, self.j, self.k, self.l,
-         self.m, self.n, self.o, self.p) = L
+        (self.a, self.e, self.i, self.m,
+         self.b, self.f, self.j, self.n,
+         self.c, self.g, self.k, self.o,
+         self.d, self.h, self.l, self.p) = L
 
     def __mul__(self, other):
         A = self
@@ -1134,29 +1134,73 @@ class Quaternion:
 # Much maths thanks to Paul Bourke, http://astronomy.swin.edu.au/~pbourke
 # ---------------------------------------------------------------------------
 
-def _closest_point2_line2(point, line):
-    d = line.v.magnitude_squared()
+def _connect_point2_line2(P, L):
+    d = L.v.magnitude_squared()
     assert d != 0
-    u = ((point.x - line.p.x) * line.v.x + \
-         (point.y - line.p.y) * line.v.y) / d
-    if not line._u_in(u):
+    u = ((P.x - L.p.x) * L.v.x + \
+         (P.y - L.p.y) * L.v.y) / d
+    if not L._u_in(u):
         u = max(min(u, 1.0), 0.0)
-    return Point2(self.p.x + u * self.v.x,
-                  self.p.y + u * self.v.y)
+    return P, Point2(self.p.x + u * self.v.x,
+                     self.p.y + u * self.v.y)
+
+def _connect_point2_circle(P, C):
+    v = P - C.c
+    v.normalize()
+    v *= C.r
+    return P, Point2(C.c.x + v.x, C.c.y + v.y)
+
+def _connect_line2_line2(A, B):
+    d = B.v.y * A.v.x - B.v.x * A.v.y
+    if d == 0:
+        # Parallel, connect an endpoint with a line
+        if isinstance(B, Ray2) or isinstance(B, LineSegment2):
+            p1, p2 = _connect_point2_line2(B.p, A)
+            return p2, p1
+        # No endpoint (or endpoint is on A), possibly choose arbitrary point
+        # on line.
+        return _connect_point2_line2(A.p, B)
+
+    dy = A.p.y - B.p.y
+    dx = A.p.x - B.p.x
+    ua = (B.v.x * dy - B.v.y * dx) / d
+    if not A._u_in(ua):
+        ua = max(min(ua, 1.0), 0.0)
+    ub = (A.v.x * dy - A.v.y * dx) / d
+    if not B._u_in(ub):
+        ub = max(min(ub, 1.0), 0.0)
+
+    return (Point2(A.p.x + ua * A.v.x, A.p.y + ua * A.v.y),
+            Point2(B.p.x + ub * B.v.x, B.p.y + ub * B.v.y))
+
+def _connect_circle_line2(C, L):
+    d = L.v.magnitude_squared()
+    assert d != 0
+    u = ((C.c.x - L.p.x) * L.v.x + (C.c.y - L.p.y) * L.v.y) / d
+    if not L._u_in(u):
+        u = max(min(u, 1.0), 0.0)
+    point = Point2(L.p.x + u * L.v.x, L.p.y + u * L.v.y)
+    v = (point - C.c)
+    v.normalize()
+    v *= C.r
+    return Point2(C.c.x + v.x, C.c.y + v.y), point
 
 class Point2(Vector2):
     def __repr__(self):
         return 'Point2(%.2f, %.2f)' % (self.x, self.y)
 
-    def closest(self, other):
-        if isinstance(other, Line2):
-            return _closest_point2_line2(self, other)
+    def connect(self, other):
+        if isinstance(other, Point2):
+            return LineSegment2(self, other)
+        elif isinstance(other, Line2):
+            p1, p2 = _connect_point2_line2
+            return LineSegment2(p1, p2)
+        elif isinstance(other, Circle):
+            return LineSegment2(_connect_point2_circle(self, other))
         raise AttributeError, other
 
     def distance(self, other):
-        if isinstance(other, Line2):
-            return abs(_closest_point2_line2(self, other) - other)
-        raise AttributeError, other
+        return self.connect(other).length
 
 class Line2:
     __slots__ = ['p', 'v']
@@ -1225,18 +1269,19 @@ class Line2:
             return other.intersect(self)
         raise AttributeError, other
 
-    def closest(self, other):
+    def connect(self, other):
         if isinstance(other, Point2):
-            return _closest_point2_line2(other, self)
+            p, l = _connect_point2_line2(other, self)
+            return LineSegment2(l, p)
+        elif isinstance(other, Line2):
+            return LineSegment2(*_connect_line2_line2(self, other))
         elif isinstance(other, Circle):
-            p = other.closest(self)
-            return LineSegment2(other.c, p - other.c, other.r).p2
+            p, l = _connect_circle_line2(other, self)
+            return LineSegment2(l, p)
         raise AttributeError, other
 
     def distance(self, other):
-        if isinstance(other, Point2):
-            return abs(_closest_point2_line2(other, self) - other)
-        raise AttributeError, other
+        return self.connect(other).length
 
 class Ray2(Line2):
     def __repr__(self):
@@ -1301,25 +1346,23 @@ class Circle:
                                        other.p.y + u2 * other.v.y))
         raise AttributeError, other
 
-    def closest(self, other):
-        if isinstance(other, Line2): 
-            # XXX: endpoint(s) may be closer than nearest colinear point; not
-            #      checked for.
-            d = other.v.magnitude_squared()
-            assert d != 0
-            u = ((self.c.x - other.p.x) * other.v.x + \
-                 (self.c.y - other.p.y) * other.v.y) / d
-            if not other._u_in(u):
-                u = max(min(u, 1.0), 0.0)
-            p = Point2(other.p.x + u * other.v.x,
-                       other.p.y + u * other.v.y)
-            return p
+    def connect(self, other):
+        if isinstance(other, Point2):
+            p, c = _connect_point2_circle(other, self)
+            return LineSegment2(c, p)
+        elif isinstance(other, Line2): 
+            return LineSegment2(*_connect_circle_line2(self, other))
+        elif isinstance(other, Circle):
+            A = self
+            B = other
+            v = B.c - A.c
+            v.normalize()
+            return (Point2(A.c.x + v.x * A.r, A.c.y + v.y * A.r),
+                    Point2(B.c.x - v.x * B.r, B.c.y - v.y * B.r))
         raise AttributeError, other  
 
     def distance(self, other):
-        if isinstance(other, Line2):
-            p = self.closest(other)
-            return abs(p - self.c) - self.r
+        return self.connect(other).length
 
 class Point3(Vector3):
     def __repr__(self):
