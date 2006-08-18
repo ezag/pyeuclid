@@ -27,6 +27,7 @@ at http://code.google.com/p/pyeuclid
 
 __docformat__ = 'restructuredtext'
 __version__ = '$Id$'
+__revision__ = '$Revision: $'
 
 import math
 import operator
@@ -1720,6 +1721,9 @@ class Line3:
 
     def _intersect_sphere(self, other):
         return _intersect_line3_sphere(self, other)
+
+    def _intersect_plane(self, other):
+        return _intersect_line3_plane(self, other)
 
     def connect(self, other):
         return other._connect_line3(self)

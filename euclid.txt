@@ -2,8 +2,8 @@
 :author: Alex Holkner
 :address: alex@partiallydisassembled.net
 
-:revision: 0.01 (in development)
-:date: 14 August 2006
+:revision: $Revision: $
+:date: 19 August 2006
 
 :copyright: Copyright (c) 2006 Alex Holkner
     Alex.Holkner@gmail.com
@@ -781,10 +781,14 @@ methods apply.  In particular, subtracting two points gives a vector::
 
 The following methods are also defined:
 
+``intersect(other)``
+    If *other* is a **Sphere**, returns ``True`` iff the point lies within
+    the sphere.
+
 ``connect(other)``
     Returns a **LineSegment3** which is the minimum length line segment
     that can connect the two shapes.  *other* may be a **Point3**, **Line3**,
-    **Ray3**, **LineSegment3** or **Sphere**.
+    **Ray3**, **LineSegment3**, **Sphere** or **Plane**.
 
 ``distance(other)``
     Returns the absolute minimum distance to *other*.  Internally this
@@ -822,11 +826,20 @@ Vector3 *v*.  You can also access (but not set) the two endpoints
 
 The following methods are supported by all three classes:
 
+``intersect(other)``
+    If *other* is a **Sphere**, returns a **LineSegment3** which is the
+    intersection of the sphere and line, or ``None`` if there is no
+    intersection.
+
+    If *other* is a **Plane**, returns a **Point3** of intersection, or
+    ``None``.
+
 ``connect(other)``
     Returns a **LineSegment3** which is the minimum length line segment
     that can connect the two shapes.  For two parallel lines, this
     line segment may be in an arbitrary position.  *other* may be
-    a **Point3**, **Line3**, **Ray3**, **LineSegment3** or **Sphere**.
+    a **Point3**, **Line3**, **Ray3**, **LineSegment3**, **Sphere** or
+    **Plane**.
 
 ``distance(other)``
     Returns the absolute minimum distance to *other*.  Internally this
@@ -848,11 +861,49 @@ Internally there are two attributes: *c*, giving the center point and
 
 The following methods are supported:
 
+``intersect(other)``:
+    If *other* is a **Point3**, returns ``True`` iff the point lies
+    within the sphere.
+
+    If *other* is a **Line3**, **Ray3** or **LineSegment3**, returns
+    a **LineSegment3** giving the intersection, or ``None`` if the
+    line does not intersect the sphere.
+
 ``connect(other)``
     Returns a **LineSegment3** which is the minimum length line segment
     that can connect the two shapes. *other* may be a **Point3**, **Line3**,
-    **Ray3**, **LineSegment3** or **Sphere**.
+    **Ray3**, **LineSegment3**, **Sphere** or **Plane**.
 
 ``distance(other)``
     Returns the absolute minimum distance to *other*.  Internally this
     simply returns the length of the result of ``connect``.
+
+Plane
+-----
+
+Planes can be constructed with any of:
+
+* three **Point3**'s lying on the plane
+* a **Point3** on the plane and the **Vector3** normal
+* a **Vector3** normal and *k*, described below.
+
+Internally, planes are stored with the normal *n* and constant *k* such
+that *n.p* = *k* for any point on the plane *p*.
+
+The following methods are supported:
+
+``intersect(other)``
+    If *other* is a **Line3**, **Ray3** or **LineSegment3**, returns a
+    **Point3** of intersection, or ``None`` if there is no intersection.
+
+    If *other* is a **Plane**, returns the **Line3** of intersection.
+
+``connect(other)``
+    Returns a **LineSegment3** which is the minimum length line segment
+    that can connect the two shapes. *other* may be a **Point3**, **Line3**,
+    **Ray3**, **LineSegment3**, **Sphere** or **Plane**.
+
+``distance(other)``
+    Returns the absolute minimum distance to *other*.  Internally this
+    simply returns the length of the result of ``connect``.
+    
