@@ -3,7 +3,7 @@
 :address: alex@partiallydisassembled.net
 
 :revision: $Revision: $
-:date: 19 August 2006
+:date: $Date: $
 
 :copyright: Copyright (c) 2006 Alex Holkner
     Alex.Holkner@gmail.com
