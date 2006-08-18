@@ -1,4 +1,3 @@
-
 :author: Alex Holkner
 :address: alex@partiallydisassembled.net
 
