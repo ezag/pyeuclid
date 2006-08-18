@@ -27,7 +27,7 @@ at http://code.google.com/p/pyeuclid
 
 __docformat__ = 'restructuredtext'
 __version__ = '$Id$'
-__revision__ = '$Revision: $'
+__revision__ = '$Revision$'
 
 import math
 import operator

@@ -1,8 +1,8 @@
 :author: Alex Holkner
 :address: alex@partiallydisassembled.net
 
-:revision: $Revision: $
-:date: $Date: $
+:revision: $Revision$
+:date: $Date$
 
 :copyright: Copyright (c) 2006 Alex Holkner
     Alex.Holkner@gmail.com
