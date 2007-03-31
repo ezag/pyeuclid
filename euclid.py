@@ -56,11 +56,32 @@ if _enable_swizzle_set:
 # Implement _use_slots magic.
 class _EuclidMetaclass(type):
     def __new__(cls, name, bases, dct):
+        if '__slots__' in dct:
+            dct['__getstate__'] = cls._create_getstate(dct['__slots__'])
+            dct['__setstate__'] = cls._create_setstate(dct['__slots__'])
         if _use_slots:
             return type.__new__(cls, name, bases + (object,), dct)
         else:
-            del dct['__slots__']
+            if '__slots__' in dct:
+                del dct['__slots__']
             return types.ClassType.__new__(types.ClassType, name, bases, dct)
+
+    @classmethod
+    def _create_getstate(cls, slots):
+        def __getstate__(self):
+            d = {}
+            for slot in slots:
+                d[slot] = getattr(self, slot)
+            return d
+        return __getstate__
+
+    @classmethod
+    def _create_setstate(cls, slots):
+        def __setstate__(self, state):
+            for name, value in state.items():
+                setattr(self, name, value)
+        return __setstate__
+
 __metaclass__ = _EuclidMetaclass
 
 class Vector2:
