@@ -1786,7 +1786,7 @@ class Point3(Vector3, Geometry):
         return _intersect_point3_sphere(self, other)
 
     def connect(self, other):
-        other._connect_point3(self)
+        return other._connect_point3(self)
 
     def _connect_point3(self, other):
         if self != other:
