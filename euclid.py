@@ -669,10 +669,21 @@ class Matrix3:
 
     def translate(self, x, y):
         self *= Matrix3.new_translate(x, y)
-        return self 
+        return self
 
     def rotate(self, angle):
         self *= Matrix3.new_rotate(angle)
+        return self
+
+    def transpose(self):
+        T = (
+         self.a, self.e, self.i,
+         self.b, self.f, self.j,
+         self.c, self.g, self.k
+        )
+        (self.a, self.b, self.c,
+         self.e, self.f, self.g,
+         self.i, self.j, self.k) = T
         return self
 
     # Static constructors
@@ -921,6 +932,19 @@ class Matrix4:
 
     def rotate_euler(self, heading, attitude, bank):
         self *= Matrix4.new_rotate_euler(heading, attitude, bank)
+        return self
+    
+    def transpose(self):
+        T = (
+         self.a, self.e, self.i, self.m,
+         self.b, self.f, self.j, self.n,
+         self.c, self.g, self.k, self.o,
+         self.d, self.h, self.l, self.p
+        )
+        (self.a, self.b, self.c, self.d,
+         self.e, self.f, self.g, self.h,
+         self.i, self.j, self.k, self.l,
+         self.m, self.n, self.o, self.p) = T
         return self
 
     # Static constructors

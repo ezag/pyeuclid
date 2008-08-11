@@ -458,7 +458,8 @@ transforms together directly::
 All constructors have an equivalent in-place method.  For **Matrix3**, they
 are ``identity``, ``translate``, ``scale`` and ``rotate``.  For **Matrix4**,
 they are ``identity``, ``translate``, ``scale``, ``rotatex``, ``rotatey``, 
-``rotatez``, ``rotate_axis`` and ``rotate_euler``.
+``rotatez``, ``rotate_axis`` and ``rotate_euler``.  Both **Matrix3** and
+**Matrix4** also have an in-place ``transpose`` method.
 
 The ``copy`` method is also implemented in both matrix classes and
 behaves in the obvious way.
