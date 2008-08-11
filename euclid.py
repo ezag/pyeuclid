@@ -755,8 +755,6 @@ class Matrix4:
                 self.d, self.h, self.l, self.p][key]
 
     def __setitem__(self, key, value):
-        assert not isinstance(key, slice) or \
-               key.stop - key.start == len(value), 'key length != value length'
         L = self[:]
         L[key] = value
         (self.a, self.e, self.i, self.m,
