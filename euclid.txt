@@ -324,6 +324,9 @@ There are class constructors for the most common types of transform.
 
 The following constructors are defined for **Matrix4** only.
 
+``new``
+    Construct a matrix with 16 values in column-major order.
+
 ``new_rotatex(angle)``, ``new_rotatey(angle)``, ``new_rotatez(angle)``
     Create a **Matrix4** for a rotation around the X, Y or Z axis, respectively.
     *angle* is specified in radians.  Example::
@@ -375,7 +378,6 @@ The following constructors are defined for **Matrix4** only.
                      0.00     1.00     0.00     0.00
                      0.00     0.00    -1.02    -2.02
                      0.00     0.00    -1.00     0.00])
-
 Operators
 ---------
 
@@ -420,6 +422,13 @@ points, however::
     Vector2(1.00, 2.00)
     >>> m1 * Point2(1.0, 2.0)
     Point2(6.00, 8.00)
+
+Multiplication is currently incorrect between matrices and vectors -- the
+projection component is ignored.  Use the **Matrix4.transform** method
+instead.
+
+Matrix4 also defines **transpose** (in-place), **transposed** (functional),
+**determinant** and **inverse** (functional) methods.
 
 A **Matrix3** can be multiplied with a **Vector2** or any of the 2D geometry
 objects (**Point2**, **Line2**, **Circle**, etc).  
