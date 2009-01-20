@@ -1457,6 +1457,12 @@ def _intersect_line2_circle(L, C):
         u1 = max(min(u1, 1.0), 0.0)
     if not L._u_in(u2):
         u2 = max(min(u2, 1.0), 0.0)
+
+    # Tangent
+    if u1 == u2:
+        return Point2(L.p.x + u1 * L.v.x,
+                      L.p.y + u1 * L.v.y)
+
     return LineSegment2(Point2(L.p.x + u1 * L.v.x,
                                L.p.y + u1 * L.v.y),
                         Point2(L.p.x + u2 * L.v.x,

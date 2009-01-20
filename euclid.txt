@@ -705,11 +705,9 @@ The following methods are supported by all three classes:
     If *other* is a **Line2**, **Ray2** or **LineSegment2**, returns
     a **Point2** of intersection, or None if the lines are parallel.
 
-    If *other* is a **Circle**, returns a **LineSegment2** giving
+    If *other* is a **Circle**, returns a **LineSegment2** or **Point2** giving
     the part of the line that intersects the circle, or None if there
-    is no intersection.  Note that a line segment is returned even
-    if the intersection is tangential (i.e., only at one point); the
-    two endpoints will be identical in this case.
+    is no intersection.
 
 ``connect(other)``
     Returns a **LineSegment2** which is the minimum length line segment
