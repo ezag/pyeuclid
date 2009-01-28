@@ -87,7 +87,7 @@ __metaclass__ = _EuclidMetaclass
 class Vector2:
     __slots__ = ['x', 'y']
 
-    def __init__(self, x, y):
+    def __init__(self, x=0, y=0):
         self.x = x
         self.y = y
 
@@ -282,7 +282,7 @@ class Vector2:
 class Vector3:
     __slots__ = ['x', 'y', 'z']
 
-    def __init__(self, x, y, z):
+    def __init__(self, x=0, y=0, z=0):
         self.x = x
         self.y = y
         self.z = z
@@ -938,6 +938,10 @@ class Matrix4:
         self *= Matrix4.new_rotate_euler(heading, attitude, bank)
         return self
 
+    def rotate_triple_axis(self, x, y, z):
+        self *= Matrix4.new_rotate_triple_axis(x, y, z)
+        return self
+
     def transpose(self):
         (self.a, self.e, self.i, self.m,
          self.b, self.f, self.j, self.n,
@@ -1058,6 +1062,26 @@ class Matrix4:
         return self
     new_rotate_euler = classmethod(new_rotate_euler)
 
+    def new_rotate_triple_axis(cls, x, y, z):
+      m = cls()
+      
+      m.a, m.b, m.c = x.x, y.x, z.x
+      m.e, m.f, m.g = x.y, y.y, z.y
+      m.i, m.j, m.k = x.z, y.z, z.z
+      
+      return m
+    new_rotate_triple_axis = classmethod(new_rotate_triple_axis)
+
+    def new_look_at(cls, eye, at, up):
+      z = (eye - at).normalized()
+      x = up.cross(z).normalized()
+      y = z.cross(x)
+      
+      m = cls.new_rotate_triple_axis(x, y, z)
+      m.d, m.h, m.i = eye.x, eye.y, eye.z
+      return m
+    new_look_at = classmethod(new_look_at)
+    
     def new_perspective(cls, fov_y, aspect, near, far):
         # from the gluPerspective man page
         f = 1 / math.tan(fov_y / 2)
@@ -1126,8 +1150,11 @@ class Quaternion:
     # w is the real part, (x, y, z) are the imaginary parts
     __slots__ = ['w', 'x', 'y', 'z']
 
-    def __init__(self):
-        self.identity()
+    def __init__(self, w=1, x=0, y=0, z=0):
+        self.w = w
+        self.x = x
+        self.y = y
+        self.z = z
 
     def __copy__(self):
         Q = Quaternion()
@@ -1224,6 +1251,10 @@ class Quaternion:
 
     def rotate_euler(self, heading, attitude, bank):
         self *= Quaternion.new_rotate_euler(heading, attitude, bank)
+        return self
+
+    def rotate_matrix(self, m):
+        self *= Quaternion.new_rotate_matrix(m)
         return self
 
     def conjugated(self):
@@ -1340,7 +1371,53 @@ class Quaternion:
         Q.z = c1 * s2 * c3 - s1 * c2 * s3
         return Q
     new_rotate_euler = classmethod(new_rotate_euler)
-
+    
+    def new_rotate_matrix(cls, m):
+      if m[0*4 + 0] + m[1*4 + 1] + m[2*4 + 2] > 0.00000001:
+        t = m[0*4 + 0] + m[1*4 + 1] + m[2*4 + 2] + 1.0
+        s = 0.5/math.sqrt(t)
+        
+        return cls(
+          s*t,
+          (m[1*4 + 2] - m[2*4 + 1])*s,
+          (m[2*4 + 0] - m[0*4 + 2])*s,
+          (m[0*4 + 1] - m[1*4 + 0])*s
+          )
+        
+      elif m[0*4 + 0] > m[1*4 + 1] and m[0*4 + 0] > m[2*4 + 2]:
+        t = m[0*4 + 0] - m[1*4 + 1] - m[2*4 + 2] + 1.0
+        s = 0.5/math.sqrt(t)
+        
+        return cls(
+          (m[1*4 + 2] - m[2*4 + 1])*s,
+          s*t,
+          (m[0*4 + 1] + m[1*4 + 0])*s,
+          (m[2*4 + 0] + m[0*4 + 2])*s
+          )
+        
+      elif m[1*4 + 1] > m[2*4 + 2]:
+        t = -m[0*4 + 0] + m[1*4 + 1] - m[2*4 + 2] + 1.0
+        s = 0.5/math.sqrt(t)
+        
+        return cls(
+          (m[2*4 + 0] - m[0*4 + 2])*s,
+          (m[0*4 + 1] + m[1*4 + 0])*s,
+          s*t,
+          (m[1*4 + 2] + m[2*4 + 1])*s
+          )
+        
+      else:
+        t = -m[0*4 + 0] - m[1*4 + 1] + m[2*4 + 2] + 1.0
+        s = 0.5/math.sqrt(t)
+        
+        return cls(
+          (m[0*4 + 1] - m[1*4 + 0])*s,
+          (m[2*4 + 0] + m[0*4 + 2])*s,
+          (m[1*4 + 2] + m[2*4 + 1])*s,
+          s*t
+          )
+    new_rotate_matrix = classmethod(new_rotate_matrix)
+    
     def new_interpolate(cls, q1, q2, t):
         assert isinstance(q1, Quaternion) and isinstance(q2, Quaternion)
         Q = cls()
