@@ -152,8 +152,15 @@ class Vector2:
 
     def __add__(self, other):
         if isinstance(other, Vector2):
-            return Vector2(self.x + other.x,
-                           self.y + other.y)
+            # Vector + Vector -> Vector
+            # Vector + Point -> Point
+            # Point + Point -> Vector
+            if self.__class__ is other.__class__:
+                _class = Vector2
+            else:
+                _class = Point2
+            return _class(self.x + other.x,
+                          self.y + other.y)
         else:
             assert hasattr(other, '__len__') and len(other) == 2
             return Vector2(self.x + other[0],
@@ -171,8 +178,15 @@ class Vector2:
 
     def __sub__(self, other):
         if isinstance(other, Vector2):
-            return Vector2(self.x - other.x,
-                           self.y - other.y)
+            # Vector - Vector -> Vector
+            # Vector - Point -> Point
+            # Point - Point -> Vector
+            if self.__class__ is other.__class__:
+                _class = Vector2
+            else:
+                _class = Point2
+            return _class(self.x - other.x,
+                          self.y - other.y)
         else:
             assert hasattr(other, '__len__') and len(other) == 2
             return Vector2(self.x - other[0],
