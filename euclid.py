@@ -1176,6 +1176,7 @@ class Quaternion:
         Q.x = self.x
         Q.y = self.y
         Q.z = self.z
+        return Q
 
     copy = __copy__
 
