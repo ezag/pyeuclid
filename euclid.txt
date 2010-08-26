@@ -216,6 +216,24 @@ The following methods do *not* alter the original vector or their arguments:
         >>> v.reflect(Vector2(1, 0))
         Vector2(-1.00, 2.00)
 
+Tests for equality include comparing against other sequences::
+
+    >>> v2 = Vector2(1, 2)
+    >>> v2 == Vector2(3, 4)
+    False
+    >>> v2 != Vector2(1, 2)
+    False
+    >>> v2 == (1, 2)
+    True
+
+    >>> v3 = Vector3(1, 2, 3)
+    >>> v3 == Vector3(3, 4, 5)
+    False
+    >>> v3 != Vector3(1, 2, 3)
+    False
+    >>> v3 == (1, 2, 3)
+    True
+
 --------------
 Matrix classes
 --------------
@@ -378,6 +396,7 @@ The following constructors are defined for **Matrix4** only.
                      0.00     1.00     0.00     0.00
                      0.00     0.00    -1.02    -2.02
                      0.00     0.00    -1.00     0.00])
+
 Operators
 ---------
 
