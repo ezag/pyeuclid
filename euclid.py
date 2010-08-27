@@ -86,6 +86,7 @@ __metaclass__ = _EuclidMetaclass
 
 class Vector2:
     __slots__ = ['x', 'y']
+    __hash__ = None
 
     def __init__(self, x=0, y=0):
         self.x = x
@@ -295,6 +296,7 @@ class Vector2:
 
 class Vector3:
     __slots__ = ['x', 'y', 'z']
+    __hash__ = None
 
     def __init__(self, x=0, y=0, z=0):
         self.x = x

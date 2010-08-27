@@ -234,6 +234,20 @@ Tests for equality include comparing against other sequences::
     >>> v3 == (1, 2, 3)
     True
 
+Vectors are not hashable, and hence cannot be put in sets nor used as
+dictionary keys::
+
+    >>> {Vector2(): 0}
+    Traceback (most recent call last):
+        ...
+    TypeError: unhashable type: 'Vector2'
+
+    >>> {Vector3(): 0}
+    Traceback (most recent call last):
+        ...
+    TypeError: unhashable type: 'Vector3'
+
+
 --------------
 Matrix classes
 --------------
