@@ -1210,16 +1210,28 @@ class Quaternion:
             Vx = other.x
             Vy = other.y
             Vz = other.z
+            ww = w * w
+            w2 = w * 2
+            wx2 = w2 * x
+            wy2 = w2 * y
+            wz2 = w2 * z
+            xx = x * x
+            x2 = x * 2
+            xy2 = x2 * y
+            xz2 = x2 * z
+            yy = y * y
+            yz2 = 2 * y * z
+            zz = z * z
             return other.__class__(\
-               w * w * Vx + 2 * y * w * Vz - 2 * z * w * Vy + \
-               x * x * Vx + 2 * y * x * Vy + 2 * z * x * Vz - \
-               z * z * Vx - y * y * Vx,
-               2 * x * y * Vx + y * y * Vy + 2 * z * y * Vz + \
-               2 * w * z * Vx - z * z * Vy + w * w * Vy - \
-               2 * x * w * Vz - x * x * Vy,
-               2 * x * z * Vx + 2 * y * z * Vy + \
-               z * z * Vz - 2 * w * y * Vx - y * y * Vz + \
-               2 * w * x * Vy - x * x * Vz + w * w * Vz)
+               ww * Vx + wy2 * Vz - wz2 * Vy + \
+               xx * Vx + xy2 * Vy + xz2 * Vz - \
+               zz * Vx - yy * Vx,
+               xy2 * Vx + yy * Vy + yz2 * Vz + \
+               wz2 * Vx - zz * Vy + ww * Vy - \
+               wx2 * Vz - xx * Vy,
+               xz2 * Vx + yz2 * Vy + \
+               zz * Vz - wy2 * Vx - yy * Vz + \
+               wx2 * Vy - xx * Vz + ww * Vz)
         else:
             other = other.copy()
             other._apply_transform(self)
