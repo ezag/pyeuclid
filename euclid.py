@@ -294,6 +294,15 @@ class Vector2:
         return Vector2(self.x - d * normal.x,
                        self.y - d * normal.y)
 
+    def angle(self, other):
+        """Return the angle to the vector other"""
+        return math.acos(self.dot(other) / (self.magnitude()*other.magnitude()))
+
+    def project(self, other):
+        """Return one vector projected on the vector other"""
+        n = other.normalized()
+        return self.dot(n)*n
+
 class Vector3:
     __slots__ = ['x', 'y', 'z']
     __hash__ = None
@@ -545,6 +554,33 @@ class Vector3:
         return Vector3(self.x - d * normal.x,
                        self.y - d * normal.y,
                        self.z - d * normal.z)
+
+    def rotate_around(self, axis, theta):
+        """Return the vector rotated around axis through angle theta. Right hand rule applies"""
+
+        # Adapted from equations published by Glenn Murray.
+        # http://inside.mines.edu/~gmurray/ArbitraryAxisRotation/ArbitraryAxisRotation.html
+        x, y, z = self.x, self.y,self.z
+        u, v, w = axis.x, axis.y, axis.z
+
+        # Extracted common factors for simplicity and efficiency
+        r2 = u**2 + v**2 + w**2
+        r = math.sqrt(r2)
+        ct = math.cos(theta)
+        st = math.sin(theta) / r
+        dt = (u*x + v*y + w*z) * (1 - ct) / r2
+        return Vector3((u * dt + x * ct + (-w * y + v * z) * st),
+                       (v * dt + y * ct + ( w * x - u * z) * st),
+                       (w * dt + z * ct + (-v * x + u * y) * st))
+
+    def angle(self, other):
+        """Return the angle to the vector other"""
+        return math.acos(self.dot(other) / (self.magnitude()*other.magnitude()))
+
+    def project(self, other):
+        """Return one vector projected on the vector other"""
+        n = other.normalized()
+        return self.dot(n)*n
 
 # a b c 
 # e f g 

@@ -216,6 +216,20 @@ The following methods do *not* alter the original vector or their arguments:
         >>> v.reflect(Vector2(1, 0))
         Vector2(-1.00, 2.00)
 
+``rotate_around(axes, theta)``
+    For 3D vectors, return the vector rotated around axis by the angle theta.
+
+        >>> v = Vector3(1., 2., 3.)
+        >>> axes = Vector3(1.,1.,0)
+        >>> v.rotate_around(axes,math.pi/4)
+        Vector3(2.65, 0.35, 2.62)
+
+``angle(other)``
+    Return the angle between two vectors.
+    
+``project(other)``
+    Return the projection (the component) of the vector on other.
+
 Tests for equality include comparing against other sequences::
 
     >>> v2 = Vector2(1, 2)
