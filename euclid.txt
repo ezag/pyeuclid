@@ -799,6 +799,11 @@ The following methods are supported:
     Returns the absolute minimum distance to *other*.  Internally this
     simply returns the length of the result of ``connect``. 
 
+``tangent_points(point)``
+    Given a **Point2**, returns tuple of two (possibly coincident) **Point2**
+    in which tangents originating at the given point are intersecting the
+    circle, or None if the given point lies inside the circle.
+
 -----------
 3D Geometry
 -----------

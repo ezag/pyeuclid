@@ -1897,6 +1897,10 @@ class Circle(Geometry):
     def _connect_circle(self, other):
         return _connect_circle_circle(other, self)
 
+    def tangent_points(self, p):
+        m = 0.5 * (self.c + p)
+        return self.intersect(Circle(m, abs(p - m)))
+
 # 3D Geometry
 # -------------------------------------------------------------------------
 

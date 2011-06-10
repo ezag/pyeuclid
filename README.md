@@ -11,6 +11,7 @@ Differences with upstream:
 
 - Fixed [#13](http://code.google.com/p/pyeuclid/issues/detail?id=13)
 - Implemented intersection of two circles
+- Implemented finding tangent points on circle
 
 Usage
 -----
