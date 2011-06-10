@@ -2,8 +2,8 @@
 #
 # euclid graphics maths module
 #
-# Copyright (c) 2006 Alex Holkner
-# Alex.Holkner@mail.google.com
+# Copyright (c) 2006 Alex Holkner <Alex.Holkner@mail.google.com>
+# Copyright (c) 2011 Eugen Zagorodniy <https://github.com/ezag/>
 #
 # This library is free software; you can redistribute it and/or modify it
 # under the terms of the GNU Lesser General Public License as published by the
@@ -1625,6 +1625,10 @@ def _intersect_line2_circle(L, C):
     sq = math.sqrt(det)
     u1 = (-b + sq) / (2 * a)
     u2 = (-b - sq) / (2 * a)
+
+    if u1 * u2 > 0 and not L._u_in(u1) and not L._u_in(u2):
+        return None
+
     if not L._u_in(u1):
         u1 = max(min(u1, 1.0), 0.0)
     if not L._u_in(u2):

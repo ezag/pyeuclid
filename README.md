@@ -9,7 +9,7 @@ The latest pulled upstream revision is
 
 Differences with upstream:
 
-- None (perhaps you may want to check out another branch/tag/commit)
+- Fixed [#13](http://code.google.com/p/pyeuclid/issues/detail?id=13)
 
 Usage
 -----
