@@ -1,9 +1,15 @@
-euclid
+pyeuclid
+========
+
 2D and 3D maths module for Python
 
-Homepage: http://code.google.com/p/pyeuclid/
-Contact:  Alex Holkner
-          Alex.Holkner@mail.google.com
+Fork of [pyeuclid](http://code.google.com/p/pyeuclid/) by Alex Holkner.
+The latest pulled upstream revision is
+[r36](http://code.google.com/p/pyeuclid/source/browse/?r=36#svn%2Ftrunk).
+
+Differences with upstream:
+
+- None (perhaps you may want to check out another branch/tag/commit)
 
 Usage
 -----
@@ -16,7 +22,8 @@ can also be run through the Makefile.
 License
 -------
 
-Copyright (c) 2006 Alex Holkner
+Copyright &copy; 2006 Alex Holkner  
+Copyright &copy; 2011 Eugen Zagorodniy  
 
 This library is free software; you can redistribute it and/or modify it
 under the terms of the GNU Lesser General Public License as published by the
