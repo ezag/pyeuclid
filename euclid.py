@@ -1644,6 +1644,26 @@ def _intersect_line2_circle(L, C):
                         Point2(L.p.x + u2 * L.v.x,
                                L.p.y + u2 * L.v.y))
 
+def _intersect_circle_circle(A, B):
+    d = abs(A.c - B.c)
+    s = A.r + B.r
+    m = abs(A.r - B.r)
+    if d > s or d < m:
+        return None
+    d2 = d ** 2
+    s2 = s ** 2
+    m2 = m ** 2
+    k = 0.25 * math.sqrt((s2 - d2) * (d2 - m2))
+    dr = (A.r ** 2 - B.r ** 2) / d2
+    kd = 2 * k / d2
+    return (
+      Point2(
+        0.5 * (A.c.x + B.c.x + (B.c.x - A.c.x) * dr) + (B.c.y - A.c.y) * kd,
+        0.5 * (A.c.y + B.c.y + (B.c.y - A.c.y) * dr) - (B.c.x - A.c.x) * kd),
+      Point2(
+        0.5 * (A.c.x + B.c.x + (B.c.x - A.c.x) * dr) - (B.c.y - A.c.y) * kd,
+        0.5 * (A.c.y + B.c.y + (B.c.y - A.c.y) * dr) + (B.c.x - A.c.x) * kd))
+
 def _connect_point2_line2(P, L):
     d = L.v.magnitude_squared()
     assert d != 0
@@ -1859,6 +1879,9 @@ class Circle(Geometry):
 
     def _intersect_line2(self, other):
         return _intersect_line2_circle(other, self)
+
+    def _intersect_circle(self, other):
+        return _intersect_circle_circle(other, self)
 
     def connect(self, other):
         return other._connect_circle(self)

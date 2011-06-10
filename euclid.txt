@@ -4,8 +4,9 @@
 :revision: $Revision$
 :date: $Date$
 
-:copyright: Copyright (c) 2006 Alex Holkner
-    Alex.Holkner@gmail.com
+:copyright: Copyright (c) 2006 Alex Holkner <Alex.Holkner@gmail.com>
+    .
+    Copyright (c) 2011 Eugen Zagorodniy <https://github.com/ezag/>
     .
     This library is free software; you can redistribute it and/or modify it
     under the terms of the GNU Lesser General Public License as published by
@@ -785,7 +786,9 @@ The following methods are supported:
 ``intersect(other)``
     If *other* is a **Line2**, **Ray2** or **LineSegment2**, returns
     a **LineSegment2** giving the part of the line that intersects the
-    circle, or None if there is no intersection.
+    circle, or None if there is no intersection. If *other* is a **Circle**,
+    returns tuple of two (possibly coincident) **Point2**, or None if there
+    is no intersection.
 
 ``connect(other)``
     Returns a **LineSegment2** which is the minimum length line segment
