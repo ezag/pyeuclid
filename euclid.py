@@ -721,6 +721,36 @@ class Matrix3:
         return self
     new_rotate = classmethod(new_rotate)
 
+    # A new matrix from a list 
+    def new(cls, list):
+        self = cls()
+        self.a = list[0]
+        self.b = list[1]
+        self.c = list[2]
+        self.e = list[3]
+        self.f = list[4]
+        self.g = list[5]
+        self.i = list[6]
+        self.j = list[7]
+        self.k = list[8]
+        return self
+    new = classmethod(new)
+
+    # A new matrix from a row major list 
+    def new_row_major(cls, list):
+        self = cls()
+        self.a = list[0]
+        self.e = list[1]
+        self.i = list[2]
+        self.b = list[3]
+        self.f = list[4]
+        self.j = list[5]
+        self.c = list[6]
+        self.g = list[7]
+        self.k = list[8]
+        return self
+    new_row_major = classmethod(new_row_major)
+
     def determinant(self):
         return (self.a*self.f*self.k 
                 + self.b*self.g*self.i 
