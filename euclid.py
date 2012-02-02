@@ -26,8 +26,8 @@ at http://code.google.com/p/pyeuclid
 '''
 
 __docformat__ = 'restructuredtext'
-__version__ = '$Id: euclid.py 34 2010-11-11 00:02:53Z tartley $'
-__revision__ = '$Revision: 34 $'
+__version__ = '$Id: euclid.py 37 2011-08-21 22:24:05Z elfnor@gmail.com $'
+__revision__ = '$Revision: 37 $'
 
 import math
 import operator
@@ -294,6 +294,15 @@ class Vector2:
         return Vector2(self.x - d * normal.x,
                        self.y - d * normal.y)
 
+    def angle(self, other):
+        """Return the angle to the vector other"""
+        return math.acos(self.dot(other) / (self.magnitude()*other.magnitude()))
+
+    def project(self, other):
+        """Return one vector projected on the vector other"""
+        n = other.normalized()
+        return self.dot(n)*n
+
 class Vector3:
     __slots__ = ['x', 'y', 'z']
     __hash__ = None
@@ -546,6 +555,33 @@ class Vector3:
                        self.y - d * normal.y,
                        self.z - d * normal.z)
 
+    def rotate_around(self, axis, theta):
+        """Return the vector rotated around axis through angle theta. Right hand rule applies"""
+
+        # Adapted from equations published by Glenn Murray.
+        # http://inside.mines.edu/~gmurray/ArbitraryAxisRotation/ArbitraryAxisRotation.html
+        x, y, z = self.x, self.y,self.z
+        u, v, w = axis.x, axis.y, axis.z
+
+        # Extracted common factors for simplicity and efficiency
+        r2 = u**2 + v**2 + w**2
+        r = math.sqrt(r2)
+        ct = math.cos(theta)
+        st = math.sin(theta) / r
+        dt = (u*x + v*y + w*z) * (1 - ct) / r2
+        return Vector3((u * dt + x * ct + (-w * y + v * z) * st),
+                       (v * dt + y * ct + ( w * x - u * z) * st),
+                       (w * dt + z * ct + (-v * x + u * y) * st))
+
+    def angle(self, other):
+        """Return the angle to the vector other"""
+        return math.acos(self.dot(other) / (self.magnitude()*other.magnitude()))
+
+    def project(self, other):
+        """Return one vector projected on the vector other"""
+        n = other.normalized()
+        return self.dot(n)*n
+
 # a b c 
 # e f g 
 # i j k 
@@ -720,36 +756,6 @@ class Matrix3:
         self.e = s
         return self
     new_rotate = classmethod(new_rotate)
-
-    # A new matrix from a list 
-    def new(cls, list):
-        self = cls()
-        self.a = list[0]
-        self.b = list[1]
-        self.c = list[2]
-        self.e = list[3]
-        self.f = list[4]
-        self.g = list[5]
-        self.i = list[6]
-        self.j = list[7]
-        self.k = list[8]
-        return self
-    new = classmethod(new)
-
-    # A new matrix from a row major list 
-    def new_row_major(cls, list):
-        self = cls()
-        self.a = list[0]
-        self.e = list[1]
-        self.i = list[2]
-        self.b = list[3]
-        self.f = list[4]
-        self.j = list[5]
-        self.c = list[6]
-        self.g = list[7]
-        self.k = list[8]
-        return self
-    new_row_major = classmethod(new_row_major)
 
     def determinant(self):
         return (self.a*self.f*self.k 
@@ -1688,9 +1694,18 @@ def _connect_circle_line2(C, L):
 
 def _connect_circle_circle(A, B):
     v = B.c - A.c
+    d = v.magnitude()
+    if A.r >= B.r and d < A.r:
+        #centre B inside A
+        s1,s2 = +1, +1
+    elif B.r > A.r and d < B.r:
+        #centre A inside B
+        s1,s2 = -1, -1
+    elif d >= A.r and d >= B.r:
+        s1,s2 = +1, -1
     v.normalize()
-    return LineSegment2(Point2(A.c.x + v.x * A.r, A.c.y + v.y * A.r),
-                        Point2(B.c.x - v.x * B.r, B.c.y - v.y * B.r))
+    return LineSegment2(Point2(A.c.x + s1 * v.x * A.r, A.c.y + s1 * v.y * A.r),
+                        Point2(B.c.x + s2 * v.x * B.r, B.c.y + s2 * v.y * B.r))
 
 
 class Point2(Vector2, Geometry):
@@ -1951,13 +1966,23 @@ def _connect_sphere_line3(S, L):
 
 def _connect_sphere_sphere(A, B):
     v = B.c - A.c
+    d = v.magnitude()
+    if A.r >= B.r and d < A.r:
+        #centre B inside A
+        s1,s2 = +1, +1
+    elif B.r > A.r and d < B.r:
+        #centre A inside B
+        s1,s2 = -1, -1
+    elif d >= A.r and d >= B.r:
+        s1,s2 = +1, -1
+
     v.normalize()
-    return LineSegment3(Point3(A.c.x + v.x * A.r,
-                               A.c.y + v.y * A.r,
-                               A.c.x + v.z * A.r),
-                        Point3(B.c.x + v.x * B.r,
-                               B.c.y + v.y * B.r,
-                               B.c.x + v.z * B.r))
+    return LineSegment3(Point3(A.c.x + s1* v.x * A.r,
+                               A.c.y + s1* v.y * A.r,
+                               A.c.z + s1* v.z * A.r),
+                        Point3(B.c.x + s2* v.x * B.r,
+                               B.c.y + s2* v.y * B.r,
+                               B.c.z + s2* v.z * B.r))
 
 def _connect_sphere_plane(S, P):
     c = _connect_point3_plane(S.c, P)
