@@ -1223,6 +1223,48 @@ class Matrix4:
             tmp.p = d * (self.a * (self.f * self.k - self.j * self.g) + self.e * (self.j * self.c - self.b * self.k) + self.i * (self.b * self.g - self.f * self.c));
 
         return tmp;
+
+    def get_quaternion(self):
+        """Returns a quaternion representing the rotation part of the matrix.
+        Taken from:
+        http://web.archive.org/web/20041029003853/http://www.j3d.org/matrix_faq/matrfaq_latest.html#Q55
+        """
+        trace = self.a + self.f + self.k
+
+        if trace > 0.00000001: #avoid dividing by zero
+            s = math.sqrt(1. + trace) * 2
+            x = (self.j - self.g) / s
+            y = (self.c - self.i) / s
+            z = (self.e - self.b) / s
+            w = 0.25 * s
+        else:
+            #this is really convenient to have now
+            mat = (self.a, self.b, self.c, self.d, 
+                   self.e, self.f, self.g, self.h,
+                   self.i, self.j, self.k, self.l,
+                   self.m, self.n, self.o, self.p
+                  )
+            if ( mat[0] > mat[5] and mat[0] > mat[10] ):    #Column 0
+                s  = math.sqrt( 1.0 + mat[0] - mat[5] - mat[10] ) * 2
+                x = 0.25 * s
+                y = (mat[4] + mat[1] ) / s
+                z = (mat[2] + mat[8] ) / s
+                w = (mat[9] - mat[6] ) / s
+            elif ( mat[5] > mat[10] ):                     # Column 1
+                s  = math.sqrt( 1.0 + mat[5] - mat[0] - mat[10] ) * 2
+                x = (mat[4] + mat[1] ) / s
+                y = 0.25 * s
+                z = (mat[9] + mat[6] ) / s
+                w = (mat[2] - mat[8] ) / s
+            else:                                          # Column 2
+                s  = math.sqrt( 1.0 + mat[10] - mat[0] - mat[5] ) * 2
+                x = (mat[2] + mat[8] ) / s
+                y = (mat[9] + mat[6] ) / s
+                z = 0.25 * s
+                w = (mat[4] - mat[1] ) / s
+
+        return Quaternion(w, x, y, z)
+
         
 
 class Quaternion:
