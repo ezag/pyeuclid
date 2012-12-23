@@ -4,6 +4,8 @@
 #
 # Copyright (c) 2006 Alex Holkner <Alex.Holkner@mail.google.com>
 # Copyright (c) 2011 Eugen Zagorodniy <https://github.com/ezag/>
+# Copyright (c) 2011 Dov Grobgeld <https://github.com/dov>
+# Copyright (c) 2012 Lorenzo Riano <https://github.com/lorenzoriano>
 #
 # This library is free software; you can redistribute it and/or modify it
 # under the terms of the GNU Lesser General Public License as published by the

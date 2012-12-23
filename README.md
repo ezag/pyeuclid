@@ -12,6 +12,9 @@ Differences with upstream:
 - Fixed [#13](http://code.google.com/p/pyeuclid/issues/detail?id=13)
 - Implemented intersection of two circles
 - Implemented finding tangent points on circle
+- Added two methods for facilitating importing 2D affine transformations
+  from external sources
+- New method to convert a `Matrix4` to a `Quaternion`
 
 Usage
 -----
@@ -25,7 +28,9 @@ License
 -------
 
 Copyright &copy; 2006 Alex Holkner  
-Copyright &copy; 2011 Eugen Zagorodniy  
+Copyright &copy; 2011&ndash;2012 Eugen Zagorodniy  
+Copyright &copy; 2011&ndash;2012 Dov Grobgeld  
+Copyright &copy; 2012 Lorenzo Riano  
 
 This library is free software; you can redistribute it and/or modify it
 under the terms of the GNU Lesser General Public License as published by the
