@@ -5,7 +5,7 @@ pyeuclid
 
 Fork of [pyeuclid](http://code.google.com/p/pyeuclid/) by Alex Holkner.
 The latest pulled upstream revision is
-[r36](http://code.google.com/p/pyeuclid/source/browse/?r=36#svn%2Ftrunk).
+[r37](http://code.google.com/p/pyeuclid/source/browse/?r=37#svn%2Ftrunk).
 
 Differences with upstream:
 
