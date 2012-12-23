@@ -294,6 +294,15 @@ class Vector2:
         return Vector2(self.x - d * normal.x,
                        self.y - d * normal.y)
 
+    def angle(self, other):
+        """Return the angle to the vector other"""
+        return math.acos(self.dot(other) / (self.magnitude()*other.magnitude()))
+
+    def project(self, other):
+        """Return one vector projected on the vector other"""
+        n = other.normalized()
+        return self.dot(n)*n
+
 class Vector3:
     __slots__ = ['x', 'y', 'z']
     __hash__ = None
@@ -545,6 +554,33 @@ class Vector3:
         return Vector3(self.x - d * normal.x,
                        self.y - d * normal.y,
                        self.z - d * normal.z)
+
+    def rotate_around(self, axis, theta):
+        """Return the vector rotated around axis through angle theta. Right hand rule applies"""
+
+        # Adapted from equations published by Glenn Murray.
+        # http://inside.mines.edu/~gmurray/ArbitraryAxisRotation/ArbitraryAxisRotation.html
+        x, y, z = self.x, self.y,self.z
+        u, v, w = axis.x, axis.y, axis.z
+
+        # Extracted common factors for simplicity and efficiency
+        r2 = u**2 + v**2 + w**2
+        r = math.sqrt(r2)
+        ct = math.cos(theta)
+        st = math.sin(theta) / r
+        dt = (u*x + v*y + w*z) * (1 - ct) / r2
+        return Vector3((u * dt + x * ct + (-w * y + v * z) * st),
+                       (v * dt + y * ct + ( w * x - u * z) * st),
+                       (w * dt + z * ct + (-v * x + u * y) * st))
+
+    def angle(self, other):
+        """Return the angle to the vector other"""
+        return math.acos(self.dot(other) / (self.magnitude()*other.magnitude()))
+
+    def project(self, other):
+        """Return one vector projected on the vector other"""
+        n = other.normalized()
+        return self.dot(n)*n
 
 # a b c 
 # e f g 
@@ -1187,6 +1223,48 @@ class Matrix4:
             tmp.p = d * (self.a * (self.f * self.k - self.j * self.g) + self.e * (self.j * self.c - self.b * self.k) + self.i * (self.b * self.g - self.f * self.c));
 
         return tmp;
+
+    def get_quaternion(self):
+        """Returns a quaternion representing the rotation part of the matrix.
+        Taken from:
+        http://web.archive.org/web/20041029003853/http://www.j3d.org/matrix_faq/matrfaq_latest.html#Q55
+        """
+        trace = self.a + self.f + self.k
+
+        if trace > 0.00000001: #avoid dividing by zero
+            s = math.sqrt(1. + trace) * 2
+            x = (self.j - self.g) / s
+            y = (self.c - self.i) / s
+            z = (self.e - self.b) / s
+            w = 0.25 * s
+        else:
+            #this is really convenient to have now
+            mat = (self.a, self.b, self.c, self.d, 
+                   self.e, self.f, self.g, self.h,
+                   self.i, self.j, self.k, self.l,
+                   self.m, self.n, self.o, self.p
+                  )
+            if ( mat[0] > mat[5] and mat[0] > mat[10] ):    #Column 0
+                s  = math.sqrt( 1.0 + mat[0] - mat[5] - mat[10] ) * 2
+                x = 0.25 * s
+                y = (mat[4] + mat[1] ) / s
+                z = (mat[2] + mat[8] ) / s
+                w = (mat[9] - mat[6] ) / s
+            elif ( mat[5] > mat[10] ):                     # Column 1
+                s  = math.sqrt( 1.0 + mat[5] - mat[0] - mat[10] ) * 2
+                x = (mat[4] + mat[1] ) / s
+                y = 0.25 * s
+                z = (mat[9] + mat[6] ) / s
+                w = (mat[2] - mat[8] ) / s
+            else:                                          # Column 2
+                s  = math.sqrt( 1.0 + mat[10] - mat[0] - mat[5] ) * 2
+                x = (mat[2] + mat[8] ) / s
+                y = (mat[9] + mat[6] ) / s
+                z = 0.25 * s
+                w = (mat[4] - mat[1] ) / s
+
+        return Quaternion(w, x, y, z)
+
         
 
 class Quaternion:
@@ -1658,9 +1736,18 @@ def _connect_circle_line2(C, L):
 
 def _connect_circle_circle(A, B):
     v = B.c - A.c
+    d = v.magnitude()
+    if A.r >= B.r and d < A.r:
+        #centre B inside A
+        s1,s2 = +1, +1
+    elif B.r > A.r and d < B.r:
+        #centre A inside B
+        s1,s2 = -1, -1
+    elif d >= A.r and d >= B.r:
+        s1,s2 = +1, -1
     v.normalize()
-    return LineSegment2(Point2(A.c.x + v.x * A.r, A.c.y + v.y * A.r),
-                        Point2(B.c.x - v.x * B.r, B.c.y - v.y * B.r))
+    return LineSegment2(Point2(A.c.x + s1 * v.x * A.r, A.c.y + s1 * v.y * A.r),
+                        Point2(B.c.x + s2 * v.x * B.r, B.c.y + s2 * v.y * B.r))
 
 
 class Point2(Vector2, Geometry):
@@ -1921,13 +2008,23 @@ def _connect_sphere_line3(S, L):
 
 def _connect_sphere_sphere(A, B):
     v = B.c - A.c
+    d = v.magnitude()
+    if A.r >= B.r and d < A.r:
+        #centre B inside A
+        s1,s2 = +1, +1
+    elif B.r > A.r and d < B.r:
+        #centre A inside B
+        s1,s2 = -1, -1
+    elif d >= A.r and d >= B.r:
+        s1,s2 = +1, -1
+
     v.normalize()
-    return LineSegment3(Point3(A.c.x + v.x * A.r,
-                               A.c.y + v.y * A.r,
-                               A.c.x + v.z * A.r),
-                        Point3(B.c.x + v.x * B.r,
-                               B.c.y + v.y * B.r,
-                               B.c.x + v.z * B.r))
+    return LineSegment3(Point3(A.c.x + s1* v.x * A.r,
+                               A.c.y + s1* v.y * A.r,
+                               A.c.z + s1* v.z * A.r),
+                        Point3(B.c.x + s2* v.x * B.r,
+                               B.c.y + s2* v.y * B.r,
+                               B.c.z + s2* v.z * B.r))
 
 def _connect_sphere_plane(S, P):
     c = _connect_point3_plane(S.c, P)
