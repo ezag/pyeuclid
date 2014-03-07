@@ -4,10 +4,10 @@ REST_HTML=rst2html
 
 all: doc doctest
 
-doc: euclid.txt
+doc: euclid.rst
 	$(REST_HTML) $< > euclid.html
 
-doctest: euclid.txt
+doctest: euclid.rst
 	python -c 'import doctest; doctest.testfile("$<")'
 
 clean:

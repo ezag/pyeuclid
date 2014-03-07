@@ -19,7 +19,7 @@ Differences with upstream:
 Usage
 -----
 
-See "euclid.txt" for detailed documentation.  The file is readable as
+See "euclid.rst" for detailed documentation.  The file is readable as
 plain text, and can also be compiled to a set of HTML pages with the
 included Makefile.  The documentation contains some tests which
 can also be run through the Makefile.
