@@ -1,6 +1,7 @@
 # $Id:$
 
-REST_HTML=rst2html
+# Get rst2html.py by running "sudo pip install docutils"
+REST_HTML=rst2html.py
 
 all: doc doctest
 
