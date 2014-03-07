@@ -1,6 +1,6 @@
 # $Id:$
 
-# Get rst2html.py by running "sudo pip install docutils"
+# To get rst2html.py install the "docutils" package with pip
 REST_HTML=rst2html.py
 
 all: doc doctest
