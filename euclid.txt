@@ -576,7 +576,7 @@ Rotations can be formed using the constructors:
         >>> q1 = Quaternion.new_rotate_axis(math.pi / 2, Vector3(1, 0, 0))
         >>> q2 = Quaternion.new_rotate_axis(math.pi / 2, Vector3(0, 1, 0))
         >>> for i in range(11):
-        ...     print Quaternion.new_interpolate(q1, q2, i / 10.0)
+        ...     print(Quaternion.new_interpolate(q1, q2, i / 10.0))
         ...
         Quaternion(real=0.71, imag=<0.71, 0.00, 0.00>)
         Quaternion(real=0.75, imag=<0.66, 0.09, 0.00>)
