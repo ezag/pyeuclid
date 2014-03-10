@@ -23,4 +23,4 @@ m = euclid.Matrix3().rotate(1.0).translate(3,4).scale(1.5,0.7)
 minv = m.inverse()
 assert_m3_unity(minv*m)
 
-print "Ok!"
+print("Ok!")

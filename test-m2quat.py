@@ -10,7 +10,7 @@ import numpy as np
 
 ntrials = 10000
 tol = 1e-5
-for t in xrange(ntrials):
+for t in range(ntrials):
     rot_x, rot_y, rot_z = np.random.uniform(-np.pi, np.pi, 3)
     m = euclid.Matrix4.new_rotate_euler(rot_y, rot_x, rot_z)
     newm = m.get_quaternion().get_matrix()
@@ -19,4 +19,4 @@ for t in xrange(ntrials):
 
 
 
-print "OK"
+print("OK")
