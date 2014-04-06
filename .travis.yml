@@ -8,6 +8,6 @@ python:
   - "3.3"
   - "pypy"
 install:
-  - sudo pip install docutils
+  - pip install docutils
 script:
   - make doctest
