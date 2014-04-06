@@ -1,5 +1,6 @@
 pyeuclid
 ========
+[![Build Status](https://travis-ci.org/brad/pyeuclid.svg?branch=master)](https://travis-ci.org/brad/pyeuclid)
 
 2D and 3D maths module for Python
 
