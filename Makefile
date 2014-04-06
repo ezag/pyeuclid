@@ -12,7 +12,7 @@ euclid.tex: euclid.txt
 	$(REST_LATEX) $< > $@
 
 doctest: euclid.txt
-	python -c 'import doctest; doctest.testfile("$<")'
+	./runtests.py $<
 
 clean:
 	rm -f *.pyc *.pyo euclid.tex 
