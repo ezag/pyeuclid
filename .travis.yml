@@ -8,7 +8,9 @@ python:
   - "3.3"
   - "pypy"
 install:
-  - sudo pip install docutils
+  - pip install coveralls docutils
 script:
-  - make
+  - make COVERAGE="coverage run --omit=runtests.py"
   - python setup.py install
+after_success:
+  - coveralls
