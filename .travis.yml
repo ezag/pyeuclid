@@ -10,4 +10,5 @@ python:
 install:
   - pip install docutils
 script:
-  - make doctest
+  - make
+  - python setup.py install
