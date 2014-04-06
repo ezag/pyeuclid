@@ -1,6 +1,6 @@
 pyeuclid
 ========
-[![Build Status](https://travis-ci.org/brad/pyeuclid.svg?branch=master)](https://travis-ci.org/brad/pyeuclid)
+[![Build Status](https://travis-ci.org/brad/pyeuclid.svg?branch=master)](https://travis-ci.org/brad/pyeuclid) [![Coverage Status](https://coveralls.io/repos/brad/pyeuclid/badge.png?branch=master)](https://coveralls.io/r/brad/pyeuclid?branch=master)
 
 2D and 3D maths module for Python
 
