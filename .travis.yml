@@ -10,5 +10,4 @@ python:
 install:
   - sudo pip install docutils
 script:
-  - make
-  - python setup.py install
+  - make doctest
