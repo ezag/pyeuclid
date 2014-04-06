@@ -23,8 +23,8 @@
 
 '''euclid graphics maths module
 
-Documentation and tests are included in the file "euclid.txt", or online
-at http://code.google.com/p/pyeuclid
+Documentation and tests are included in the file "euclid.rst", or online
+at https://github.com/ezag/pyeuclid/blob/master/euclid.rst
 '''
 
 __docformat__ = 'restructuredtext'
