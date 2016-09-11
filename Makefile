@@ -1,19 +1,15 @@
 # $Id:$
 
-MKHOWTO=/usr/share/doc/Python-2.5a2/tools/mkhowto
-REST_LATEX=/usr/lib/python2.4/site-packages/docutils/tools/python_latex.py
+# To get rst2html.py install the "docutils" package with pip
+REST_HTML=rst2html.py
 
 all: doc doctest
 
-doc: euclid.tex
-	$(MKHOWTO) --split=4 $<
+doc: euclid.rst
+	$(REST_HTML) $< > euclid.html
 
-euclid.tex: euclid.txt
-	$(REST_LATEX) $< > $@
-
-doctest: euclid.txt
-	./runtests.py $<
+doctest: euclid.rst
+	$(COVERAGE) ./runtests.py $<
 
 clean:
-	rm -f *.pyc *.pyo euclid.tex 
-	rm -rf euclid
+	rm -f *.pyc *.pyo *.html
