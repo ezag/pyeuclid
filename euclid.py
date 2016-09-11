@@ -120,7 +120,7 @@ class Vector2:
         return not self.__eq__(other)
 
     def __nonzero__(self):
-        return self.x != 0 or self.y != 0
+        return bool(self.x != 0 or self.y != 0)
 
     def __len__(self):
         return 2
@@ -344,7 +344,7 @@ class Vector3:
         return not self.__eq__(other)
 
     def __nonzero__(self):
-        return self.x != 0 or self.y != 0 or self.z != 0
+        return bool(self.x != 0 or self.y != 0 or self.z != 0)
 
     def __len__(self):
         return 3
