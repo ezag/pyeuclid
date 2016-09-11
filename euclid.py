@@ -1167,7 +1167,8 @@ class Matrix4:
       y = z.cross(x)
       
       m = cls.new_rotate_triple_axis(x, y, z)
-      m.d, m.h, m.l = eye.x, eye.y, eye.z
+      m.transpose()
+      m.d, m.h, m.l = -x.dot(eye), -y.dot(eye), -z.dot(eye)
       return m
     new_look_at = classmethod(new_look_at)
     
