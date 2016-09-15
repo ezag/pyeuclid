@@ -9,6 +9,7 @@ setup(
         'pytest-runner',
     ],
     tests_require=[
+        'numpy',
         'pytest',
     ],
 
