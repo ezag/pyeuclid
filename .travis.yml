@@ -1,15 +1,15 @@
----
-
 language: python
 python:
   - "2.6"
   - "2.7"
-  - "3.2"
+  # Coverage.py doesn't support Python 3.2 and so do we
   - "3.3"
+  - "3.4"
+  - "3.5"
 install:
-  - pip install coveralls docutils
+  - pip install -e .
+  - pip install python-coveralls
 script:
-  - make COVERAGE="coverage run --omit=runtests.py"
-  - python setup.py install
+  - make COVERAGE="coverage run --omit=runtests.py" doctest
 after_success:
   - coveralls
