@@ -5,6 +5,14 @@ setup(
     version='1.0.dev0',
     packages=find_packages(),
 
+    setup_requires=[
+        'pytest-runner',
+    ],
+    tests_require=[
+        'numpy',
+        'pytest',
+    ],
+
     author='Eugen Zagorodniy',
     author_email='e.zagorodniy@gmail.com',
     description='2D and 3D vector, matrix, quaternion and geometry module',

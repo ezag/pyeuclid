@@ -8,8 +8,8 @@ python:
   - "3.5"
 install:
   - pip install -e .
-  - pip install python-coveralls
+  - pip install pytest-cov
 script:
-  - make COVERAGE="coverage run --omit=runtests.py" doctest
+  - py.test --cov=euclid --cov-report=
 after_success:
   - coveralls
