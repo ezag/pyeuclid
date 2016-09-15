@@ -2,6 +2,7 @@
 
 # To get rst2html.py install the "docutils" package with pip
 REST_HTML=rst2html.py
+COVERAGE=
 
 all: doc doctest
 
