@@ -8,8 +8,8 @@ python:
   - "3.5"
 install:
   - pip install -e .
-  - pip install pytest-cov python-coveralls
+  - pip install pytest-cov
 script:
   - py.test --cov=euclid --cov-report=
 after_success:
-  - coveralls
+  - bash <(curl -s https://codecov.io/bash)
