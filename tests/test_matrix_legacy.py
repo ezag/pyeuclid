@@ -5,6 +5,12 @@ import numpy as np
 import euclid
 
 
+try:
+    xrange
+except NameError:
+    xrange = range
+
+
 def test_m2quat():
     """
     Test the euclid Matrix4 to Quaterion code.
