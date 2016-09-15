@@ -3,3 +3,5 @@
 /.env3/
 /.eggs/
 /*.egg-info/
+/.coverage
+*.html
